@@ -17,3 +17,20 @@
   - [ ] ? unbind
 - [ ] User management
 - [ ] Logging
+
+## Development
+
+* Clone the repo:
+
+```
+git clone https://github.com/Altoros/redislabs-service-broker.git
+```
+
+* Execute `source .envrc` or `direnv allow` if you have [direnv](http://direnv.net/)
+
+### Adding a dependency
+
+* Install [glide](https://github.com/Masterminds/glide.git)
+* `glide get github.com/<ORG>/<REPO>`
+* `find vendor -name '.git' | xargs rm -r`
+* `git add vendor glide.yaml` & commit
