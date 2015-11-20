@@ -11,6 +11,12 @@ type InstanceCreator interface {
 	InstanceExists(instanceID string) (bool, error)
 }
 
+type InstanceCredentials struct {
+	Host     string
+	Port     int64
+	Password string
+}
+
 type InstanceBinder interface {
 	Bind(instanceID string, bindingID string) (InstanceCredentials, error)
 	Unbind(instanceID string, bindingID string) error
@@ -24,6 +30,7 @@ type Broker struct {
 }
 
 func (b *Broker) Services() []brokerapi.Service {
+	return []brokerapi.Service{}
 	// planList := []brokerapi.ServicePlan{}
 	// for _, plan := range redisLabsServiceBroker.plans() {
 	// 	planList = append(planList, *plan)
@@ -57,7 +64,8 @@ func (b *Broker) Services() []brokerapi.Service {
 	// }
 }
 
-func (b *Broker) Provision(instanceID string, serviceDetails brokerapi.ServiceDetails) error {
+func (b *Broker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
+	return nil
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
 	// }
@@ -87,16 +95,18 @@ func (b *Broker) Provision(instanceID string, serviceDetails brokerapi.ServiceDe
 }
 
 func (b *Broker) Deprovision(instanceID string) error {
-	for _, instanceCreator := range redisLabsServiceBroker.InstanceCreators {
-		instanceExists, _ := instanceCreator.InstanceExists(instanceID)
-		if instanceExists {
-			return instanceCreator.Destroy(instanceID)
-		}
-	}
-	return brokerapi.ErrInstanceDoesNotExist
+	return nil
+	//for _, instanceCreator := range redisLabsServiceBroker.InstanceCreators {
+	//	instanceExists, _ := instanceCreator.InstanceExists(instanceID)
+	//	if instanceExists {
+	//		return instanceCreator.Destroy(instanceID)
+	//	}
+	//}
+	//return brokerapi.ErrInstanceDoesNotExist
 }
 
 func (b *Broker) Bind(instanceID, bindingID string) (interface{}, error) {
+	return nil, nil
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
 	// 	if instanceExists {
@@ -117,6 +127,7 @@ func (b *Broker) Bind(instanceID, bindingID string) (interface{}, error) {
 }
 
 func (b *Broker) Unbind(instanceID, bindingID string) error {
+	return nil
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
 	// 	if instanceExists {
@@ -132,6 +143,7 @@ func (b *Broker) Unbind(instanceID, bindingID string) error {
 }
 
 func (b *Broker) plans() map[string]*brokerapi.ServicePlan {
+	return map[string]*brokerapi.ServicePlan{}
 	// plans := map[string]*brokerapi.ServicePlan{}
 
 	// if redisLabsServiceBroker.Config.SharedEnabled() {
