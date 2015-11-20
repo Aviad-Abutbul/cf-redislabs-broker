@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 
-	"github.com/altoros/redislabs-service-broker/brokerconfig"
+	"github.com/altoros/redislabs-service-broker/config"
 	"github.com/pivotal-cf/brokerapi"
 )
 
@@ -22,7 +22,7 @@ type InstanceBinder interface {
 type Broker struct {
 	InstanceCreators map[string]InstanceCreator
 	InstanceBinders  map[string]InstanceBinder
-	Config           brokerconfig.Config
+	Config           config.Config
 }
 
 func (b *Broker) Services() []brokerapi.Service {
