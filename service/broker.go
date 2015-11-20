@@ -1,4 +1,4 @@
-package broker
+package service
 
 import (
 	"errors"
@@ -19,13 +19,13 @@ type InstanceBinder interface {
 	InstanceExists(instanceID string) (bool, error)
 }
 
-type RedisLabsServiceBroker struct {
+type Broker struct {
 	InstanceCreators map[string]InstanceCreator
 	InstanceBinders  map[string]InstanceBinder
 	Config           brokerconfig.Config
 }
 
-func (redisLabsServiceBroker *RedisLabsServiceBroker) Services() []brokerapi.Service {
+func (b *Broker) Services() []brokerapi.Service {
 	// planList := []brokerapi.ServicePlan{}
 	// for _, plan := range redisLabsServiceBroker.plans() {
 	// 	planList = append(planList, *plan)
@@ -59,7 +59,7 @@ func (redisLabsServiceBroker *RedisLabsServiceBroker) Services() []brokerapi.Ser
 	// }
 }
 
-func (redisLabsServiceBroker *RedisLabsServiceBroker) Provision(instanceID string, serviceDetails brokerapi.ServiceDetails) error {
+func (b *Broker) Provision(instanceID string, serviceDetails brokerapi.ServiceDetails) error {
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
 	// }
@@ -88,7 +88,7 @@ func (redisLabsServiceBroker *RedisLabsServiceBroker) Provision(instanceID strin
 	// return instanceCreator.Create(instanceID)
 }
 
-func (redisLabsServiceBroker *RedisLabsServiceBroker) Deprovision(instanceID string) error {
+func (b *Broker) Deprovision(instanceID string) error {
 	for _, instanceCreator := range redisLabsServiceBroker.InstanceCreators {
 		instanceExists, _ := instanceCreator.InstanceExists(instanceID)
 		if instanceExists {
@@ -98,7 +98,7 @@ func (redisLabsServiceBroker *RedisLabsServiceBroker) Deprovision(instanceID str
 	return brokerapi.ErrInstanceDoesNotExist
 }
 
-func (redisLabsServiceBroker *RedisLabsServiceBroker) Bind(instanceID, bindingID string) (interface{}, error) {
+func (b *Broker) Bind(instanceID, bindingID string) (interface{}, error) {
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
 	// 	if instanceExists {
@@ -118,7 +118,7 @@ func (redisLabsServiceBroker *RedisLabsServiceBroker) Bind(instanceID, bindingID
 	// return nil, brokerapi.ErrInstanceDoesNotExist
 }
 
-func (redisLabsServiceBroker *RedisLabsServiceBroker) Unbind(instanceID, bindingID string) error {
+func (b *Broker) Unbind(instanceID, bindingID string) error {
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
 	// 	if instanceExists {
@@ -133,7 +133,7 @@ func (redisLabsServiceBroker *RedisLabsServiceBroker) Unbind(instanceID, binding
 	// return brokerapi.ErrInstanceDoesNotExist
 }
 
-func (redisLabsServiceBroker *RedisLabsServiceBroker) plans() map[string]*brokerapi.ServicePlan {
+func (b *Broker) plans() map[string]*brokerapi.ServicePlan {
 	// plans := map[string]*brokerapi.ServicePlan{}
 
 	// if redisLabsServiceBroker.Config.SharedEnabled() {
