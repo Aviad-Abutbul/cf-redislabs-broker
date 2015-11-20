@@ -1,8 +1,6 @@
 package service
 
 import (
-	"errors"
-
 	"github.com/altoros/redislabs-service-broker/config"
 	"github.com/pivotal-cf/brokerapi"
 )
