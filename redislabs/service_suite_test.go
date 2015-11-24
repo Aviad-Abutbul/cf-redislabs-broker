@@ -1,4 +1,4 @@
-package service_test
+package redislabs_test
 
 import (
 	. "github.com/onsi/ginkgo"

@@ -1,35 +1,34 @@
-package service
+package redislabs
 
 import (
-	"github.com/altoros/redislabs-service-broker/config"
 	"github.com/pivotal-cf/brokerapi"
 )
 
-type InstanceCreator interface {
+type ServiceInstanceCreator interface {
 	Create(instanceID string) error
 	Destroy(instanceID string) error
 	InstanceExists(instanceID string) (bool, error)
 }
 
-type InstanceCredentials struct {
+type ServiceInstanceCredentials struct {
 	Host     string
 	Port     int64
 	Password string
 }
 
-type InstanceBinder interface {
-	Bind(instanceID string, bindingID string) (InstanceCredentials, error)
+type ServiceInstanceBinder interface {
+	Bind(instanceID string, bindingID string) (ServiceInstanceCredentials, error)
 	Unbind(instanceID string, bindingID string) error
 	InstanceExists(instanceID string) (bool, error)
 }
 
-type Broker struct {
-	InstanceCreators map[string]InstanceCreator
-	InstanceBinders  map[string]InstanceBinder
-	Config           config.Config
+type ServiceBroker struct {
+	InstanceCreators map[string]ServiceInstanceCreator
+	InstanceBinders  map[string]ServiceInstanceBinder
+	Config           Config
 }
 
-func (b *Broker) Services() []brokerapi.Service {
+func (b *ServiceBroker) Services() []brokerapi.Service {
 	return []brokerapi.Service{}
 	// planList := []brokerapi.ServicePlan{}
 	// for _, plan := range redisLabsServiceBroker.plans() {
@@ -64,7 +63,7 @@ func (b *Broker) Services() []brokerapi.Service {
 	// }
 }
 
-func (b *Broker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
+func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
 	return nil
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
@@ -94,7 +93,7 @@ func (b *Broker) Provision(instanceID string, provisionDetails brokerapi.Provisi
 	// return instanceCreator.Create(instanceID)
 }
 
-func (b *Broker) Deprovision(instanceID string) error {
+func (b *ServiceBroker) Deprovision(instanceID string) error {
 	return nil
 	//for _, instanceCreator := range redisLabsServiceBroker.InstanceCreators {
 	//	instanceExists, _ := instanceCreator.InstanceExists(instanceID)
@@ -105,7 +104,7 @@ func (b *Broker) Deprovision(instanceID string) error {
 	//return brokerapi.ErrInstanceDoesNotExist
 }
 
-func (b *Broker) Bind(instanceID, bindingID string) (interface{}, error) {
+func (b *ServiceBroker) Bind(instanceID, bindingID string) (interface{}, error) {
 	return nil, nil
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
@@ -126,7 +125,7 @@ func (b *Broker) Bind(instanceID, bindingID string) (interface{}, error) {
 	// return nil, brokerapi.ErrInstanceDoesNotExist
 }
 
-func (b *Broker) Unbind(instanceID, bindingID string) error {
+func (b *ServiceBroker) Unbind(instanceID, bindingID string) error {
 	return nil
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
@@ -142,7 +141,7 @@ func (b *Broker) Unbind(instanceID, bindingID string) error {
 	// return brokerapi.ErrInstanceDoesNotExist
 }
 
-func (b *Broker) plans() map[string]*brokerapi.ServicePlan {
+func (b *ServiceBroker) plans() map[string]*brokerapi.ServicePlan {
 	return map[string]*brokerapi.ServicePlan{}
 	// plans := map[string]*brokerapi.ServicePlan{}
 

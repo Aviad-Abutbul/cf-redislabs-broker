@@ -1,4 +1,4 @@
-package config
+package redislabs
 
 type Config struct {
 }
