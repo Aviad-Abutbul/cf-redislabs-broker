@@ -2,6 +2,7 @@ package redislabs_test
 
 import (
 	"github.com/altoros/redislabs-service-broker/redislabs"
+	"github.com/altoros/redislabs-service-broker/redislabs/adapters"
 	"github.com/pivotal-cf/brokerapi"
 
 	. "github.com/onsi/ginkgo"
@@ -10,13 +11,17 @@ import (
 
 var _ = Describe("Broker", func() {
 	var (
-		broker redislabs.ServiceBroker
-		config redislabs.Config
+		broker           redislabs.ServiceBroker
+		config           redislabs.Config
+		instanceCreators = map[string]redislabs.ServiceInstanceCreator{}
+		instanceBinders  = map[string]redislabs.ServiceInstanceBinder{}
 	)
 
 	JustBeforeEach(func() {
 		broker = redislabs.ServiceBroker{
-			Config: config,
+			Config:           config,
+			InstanceCreators: instanceCreators,
+			InstanceBinders:  instanceBinders,
 		}
 	})
 
@@ -87,10 +92,23 @@ var _ = Describe("Broker", func() {
 					Expect(err).To(Equal(redislabs.ErrPlanDoesNotExist))
 				})
 			})
-			Context("And given correct plan and instance IDs", func() {
+			Context("And no instance creators", func() {
 				BeforeEach(func() {
 					requestedServiceID = serviceID
 					requestedPlanID = planID
+				})
+				It("Rejects to create an instance", func() {
+					err := broker.Provision("some-id", details)
+					Expect(err).To(HaveOccurred())
+					Expect(err).To(Equal(redislabs.ErrInstanceCreatorNotFound))
+				})
+			})
+			Context("And given a default instance creator and correct plan and instance IDs", func() {
+				BeforeEach(func() {
+					requestedServiceID = serviceID
+					requestedPlanID = planID
+					instanceCreators = map[string]redislabs.ServiceInstanceCreator{}
+					instanceCreators[planID] = &adapters.Default{}
 				})
 				It("Creates an instance of the configured default plan", func() {
 					err := broker.Provision("some-id", details)
