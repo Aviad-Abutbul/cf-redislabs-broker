@@ -1,8 +1,6 @@
 package redislabs
 
-import (
-	"github.com/pivotal-cf/brokerapi"
-)
+import "github.com/pivotal-cf/brokerapi"
 
 type ServiceInstanceCreator interface {
 	Create(instanceID string) error
@@ -79,7 +77,10 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	if _, ok := plansByID[provisionDetails.PlanID]; !ok {
 		return ErrPlanDoesNotExist
 	}
-	return nil
+	if adapter, ok := b.InstanceCreators[provisionDetails.PlanID]; ok {
+		return adapter.Create(instanceID)
+	}
+	return ErrInstanceCreatorNotFound
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
 	// }
