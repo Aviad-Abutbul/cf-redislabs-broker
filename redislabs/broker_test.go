@@ -73,6 +73,7 @@ var _ = Describe("Broker", func() {
 				It("Rejects to create an instance", func() {
 					err := broker.Provision("some-id", details)
 					Expect(err).To(HaveOccurred())
+					Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
 				})
 			})
 			Context("And a wrong plan ID", func() {
@@ -83,6 +84,7 @@ var _ = Describe("Broker", func() {
 				It("Rejects to create an instance", func() {
 					err := broker.Provision("some-id", details)
 					Expect(err).To(HaveOccurred())
+					Expect(err).To(Equal(redislabs.ErrPlanDoesNotExist))
 				})
 			})
 			Context("And given correct plan and instance IDs", func() {
