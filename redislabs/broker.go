@@ -72,6 +72,13 @@ func (b *ServiceBroker) Services() []brokerapi.Service {
 }
 
 func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
+	if provisionDetails.ID != b.Config.ServiceID {
+		return brokerapi.ErrInstanceDoesNotExist
+	}
+	plansByID := b.plans()
+	if _, ok := plansByID[provisionDetails.PlanID]; !ok {
+		return ErrPlanDoesNotExist
+	}
 	return nil
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
