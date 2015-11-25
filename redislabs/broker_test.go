@@ -12,10 +12,22 @@ var _ = Describe("Broker", func() {
 	var (
 		broker   redislabs.ServiceBroker
 		services []brokerapi.Service
+		config   redislabs.Config
 	)
 
 	BeforeEach(func() {
-		broker = redislabs.ServiceBroker{}
+		config = redislabs.Config{
+			DefaultPlans: []redislabs.ServicePlanConfig{
+				{
+					ID:          "",
+					Name:        "test",
+					Description: "",
+				},
+			},
+		}
+		broker = redislabs.ServiceBroker{
+			Config: config,
+		}
 		services = broker.Services()
 	})
 
