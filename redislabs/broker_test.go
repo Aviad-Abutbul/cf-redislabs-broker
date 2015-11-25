@@ -93,6 +93,10 @@ var _ = Describe("Broker", func() {
 					err := broker.Provision("some-id", details)
 					Expect(err).ToNot(HaveOccurred())
 				})
+				It("Rejects to provision the same instance again", func() {
+					err := broker.Provision("some-id", details)
+					Expect(err).To(HaveOccurred())
+				})
 			})
 		})
 	})
