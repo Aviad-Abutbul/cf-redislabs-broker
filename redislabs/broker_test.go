@@ -48,7 +48,7 @@ var _ = Describe("Broker", func() {
 		Context("Given a config with a default plan", func() {
 			BeforeEach(func() {
 				config = redislabs.Config{
-					ID: serviceID,
+					ServiceID: serviceID,
 					DefaultPlans: []redislabs.ServicePlanConfig{
 						{
 							ID:          planID,
