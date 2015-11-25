@@ -1,15 +1,15 @@
 package adapters
 
-type Default struct{}
+type DefaultCreator struct {}
 
-func (d *Default) Create(instanceID string) error {
+func (d *DefaultCreator) Create(instanceID string) error {
+    return nil
+}
+
+func (d *DefaultCreator) Destroy(instanceID string) error {
 	return nil
 }
 
-func (d *Default) Destroy(instanceID string) error {
-	return nil
-}
-
-func (d *Default) InstanceExists(instanceID string) (bool, error) {
+func (d *DefaultCreator) InstanceExists(instanceID string) (bool, error) {
 	return false, nil
 }

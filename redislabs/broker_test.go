@@ -108,7 +108,7 @@ var _ = Describe("Broker", func() {
 					requestedServiceID = serviceID
 					requestedPlanID = planID
 					instanceCreators = map[string]redislabs.ServiceInstanceCreator{}
-					instanceCreators[planID] = &adapters.Default{}
+					instanceCreators[planID] = &adapters.DefaultCreator{}
 				})
 				It("Creates an instance of the configured default plan", func() {
 					err := broker.Provision("some-id", details)
