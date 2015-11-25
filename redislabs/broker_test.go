@@ -77,7 +77,8 @@ var _ = Describe("Broker", func() {
 			})
 			Context("And a wrong plan ID", func() {
 				BeforeEach(func() {
-					requestedServiceID = "unknown"
+					requestedServiceID = serviceID
+					requestedPlanID = "unknown"
 				})
 				It("Rejects to create an instance", func() {
 					err := broker.Provision("some-id", details)
