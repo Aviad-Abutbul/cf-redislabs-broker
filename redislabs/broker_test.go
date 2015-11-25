@@ -42,11 +42,13 @@ var _ = Describe("Broker", func() {
 
 	Describe("Provisioning an instance", func() {
 		var (
-			serviceID, requestedServiceID, planID, requestedPlanID string
-			details                                                brokerapi.ProvisionDetails
+			serviceID                           = "test-service-id"
+			planID                              = "test-plan-id"
+			requestedServiceID, requestedPlanID string
+			details                             brokerapi.ProvisionDetails
 		)
 		Context("Given a config with a default plan", func() {
-			BeforeEach(func() {
+			JustBeforeEach(func() {
 				config = redislabs.Config{
 					ServiceID: serviceID,
 					DefaultPlans: []redislabs.ServicePlanConfig{
