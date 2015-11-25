@@ -29,7 +29,15 @@ type ServiceBroker struct {
 }
 
 func (b *ServiceBroker) Services() []brokerapi.Service {
-	return []brokerapi.Service{}
+	planList := []brokerapi.ServicePlan{}
+	for _, p := range b.plans() {
+		planList = append(planList, *p)
+	}
+	return []brokerapi.Service{
+		brokerapi.Service{
+			Plans: planList,
+		},
+	}
 	// planList := []brokerapi.ServicePlan{}
 	// for _, plan := range redisLabsServiceBroker.plans() {
 	// 	planList = append(planList, *plan)
@@ -142,7 +150,12 @@ func (b *ServiceBroker) Unbind(instanceID, bindingID string) error {
 }
 
 func (b *ServiceBroker) plans() map[string]*brokerapi.ServicePlan {
-	return map[string]*brokerapi.ServicePlan{}
+	plansByID := map[string]*brokerapi.ServicePlan{}
+	for _, p := range b.Config.DefaultPlans {
+		servicePlan := LoadServicePlan(p)
+		plansByID[servicePlan.ID] = &servicePlan
+	}
+	return plansByID
 	// plans := map[string]*brokerapi.ServicePlan{}
 
 	// if redisLabsServiceBroker.Config.SharedEnabled() {
