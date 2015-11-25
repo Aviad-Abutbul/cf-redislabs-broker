@@ -2,7 +2,7 @@ package redislabs_test
 
 import (
 	"github.com/altoros/redislabs-service-broker/redislabs"
-	"github.com/altoros/redislabs-service-broker/vendor/github.com/pivotal-cf/brokerapi"
+	"github.com/pivotal-cf/brokerapi"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
