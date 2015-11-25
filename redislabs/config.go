@@ -3,6 +3,7 @@ package redislabs
 import "github.com/pivotal-cf/brokerapi"
 
 type Config struct {
+	ID           string              `yaml:"service_id"`
 	DefaultPlans []ServicePlanConfig `yaml:"plans"`
 }
 
