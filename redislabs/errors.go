@@ -1,5 +1,7 @@
 package redislabs
 
+import "errors"
+
 var (
-	ErrPlanDoesNotExist error
+	ErrPlanDoesNotExist        = errors.New("plan does not exist")
 )
