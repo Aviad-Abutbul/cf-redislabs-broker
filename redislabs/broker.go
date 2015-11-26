@@ -21,9 +21,9 @@ type ServiceInstanceBinder interface {
 }
 
 type ServiceBroker struct {
-	InstanceCreators map[string]ServiceInstanceCreator
-	InstanceBinders  map[string]ServiceInstanceBinder
-	Config           Config
+	InstanceCreator ServiceInstanceCreator
+	InstanceBinder  ServiceInstanceBinder
+	Config          Config
 }
 
 func (b *ServiceBroker) Services() []brokerapi.Service {
@@ -77,7 +77,7 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	if _, ok := plansByID[provisionDetails.PlanID]; !ok {
 		return ErrPlanDoesNotExist
 	}
-	if adapter, ok := b.InstanceCreators[provisionDetails.PlanID]; ok {
+	if adapter := b.InstanceCreator; adapter != nil {
 		return adapter.Create(instanceID)
 	}
 	return ErrInstanceCreatorNotFound

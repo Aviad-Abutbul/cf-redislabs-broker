@@ -11,17 +11,17 @@ import (
 
 var _ = Describe("Broker", func() {
 	var (
-		broker           redislabs.ServiceBroker
-		config           redislabs.Config
-		instanceCreators = map[string]redislabs.ServiceInstanceCreator{}
-		instanceBinders  = map[string]redislabs.ServiceInstanceBinder{}
+		broker          redislabs.ServiceBroker
+		config          redislabs.Config
+		instanceCreator redislabs.ServiceInstanceCreator
+		instanceBinders redislabs.ServiceInstanceBinder
 	)
 
 	JustBeforeEach(func() {
 		broker = redislabs.ServiceBroker{
-			Config:           config,
-			InstanceCreators: instanceCreators,
-			InstanceBinders:  instanceBinders,
+			Config:          config,
+			InstanceCreator: instanceCreator,
+			InstanceBinder:  instanceBinder,
 		}
 	})
 
@@ -107,8 +107,7 @@ var _ = Describe("Broker", func() {
 				BeforeEach(func() {
 					requestedServiceID = serviceID
 					requestedPlanID = planID
-					instanceCreators = map[string]redislabs.ServiceInstanceCreator{}
-					instanceCreators[planID] = &adapters.DefaultCreator{}
+					instanceCreator = &adapters.DefaultCreator{}
 				})
 				It("Creates an instance of the configured default plan", func() {
 					err := broker.Provision("some-id", details)
