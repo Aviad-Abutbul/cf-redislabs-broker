@@ -1,11 +1,14 @@
 package redislabs
 
-import "github.com/pivotal-cf/brokerapi"
+import (
+	"github.com/altoros/redislabs-service-broker/redislabs/persisters"
+	"github.com/pivotal-cf/brokerapi"
+)
 
 type ServiceInstanceCreator interface {
-	Create(instanceID string) error
-	Destroy(instanceID string) error
-	InstanceExists(instanceID string) (bool, error)
+	Create(instanceID string, persister persisters.StatePersister) error
+	Destroy(instanceID string, persister persisters.StatePersister) error
+	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
 }
 
 type ServiceInstanceCredentials struct {
@@ -15,14 +18,15 @@ type ServiceInstanceCredentials struct {
 }
 
 type ServiceInstanceBinder interface {
-	Bind(instanceID string, bindingID string) (ServiceInstanceCredentials, error)
-	Unbind(instanceID string, bindingID string) error
-	InstanceExists(instanceID string) (bool, error)
+	Bind(instanceID string, bindingID string, persister persisters.StatePersister) (ServiceInstanceCredentials, error)
+	Unbind(instanceID string, bindingID string, persister persisters.StatePersister) error
+	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
 }
 
 type ServiceBroker struct {
 	InstanceCreator ServiceInstanceCreator
 	InstanceBinder  ServiceInstanceBinder
+	Persister       persisters.StatePersister
 	Config          Config
 }
 
@@ -77,10 +81,15 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	if _, ok := plansByID[provisionDetails.PlanID]; !ok {
 		return ErrPlanDoesNotExist
 	}
-	if adapter := b.InstanceCreator; adapter != nil {
-		return adapter.Create(instanceID)
+	adapter := b.InstanceCreator
+	if adapter == nil {
+		return ErrInstanceCreatorNotFound
 	}
-	return ErrInstanceCreatorNotFound
+	persister := b.Persister
+	if persister == nil {
+		return ErrPersisterNotFound
+	}
+	return adapter.Create(instanceID, persister)
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
 	// }
