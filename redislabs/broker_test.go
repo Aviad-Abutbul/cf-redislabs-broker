@@ -14,7 +14,7 @@ var _ = Describe("Broker", func() {
 		broker          redislabs.ServiceBroker
 		config          redislabs.Config
 		instanceCreator redislabs.ServiceInstanceCreator
-		instanceBinders redislabs.ServiceInstanceBinder
+		instanceBinder  redislabs.ServiceInstanceBinder
 	)
 
 	JustBeforeEach(func() {
