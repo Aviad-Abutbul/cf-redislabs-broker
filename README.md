@@ -40,7 +40,7 @@ Note: User `glide` with at least `0.7.2` version.
 ### Tests
 
 ```
-go test ./redislabs
+go test ./redislabs/...
 ```
 
 ### How to run
