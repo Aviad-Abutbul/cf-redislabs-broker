@@ -1,6 +1,10 @@
 package persisters_test
 
 import (
+	"io/ioutil"
+	"os"
+	"path"
+
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 
 	. "github.com/onsi/ginkgo"
@@ -9,12 +13,10 @@ import (
 
 var _ = Describe("Persisters", func() {
 	var (
-		local persisters.Local
 		state persisters.State
 	)
 
 	BeforeEach(func() {
-		local = persisters.Local{}
 		state = persisters.State{
 			AvailableInstances: []persisters.ServiceInstance{
 				{
@@ -28,15 +30,24 @@ var _ = Describe("Persisters", func() {
 	})
 
 	Describe("Local JSON file persister", func() {
+		var (
+			local       = persisters.Local{}
+			tmpStateDir string
+		)
+
 		Context("Given an instance state", func() {
-			It("Appears to save it successfully", func() {
+			It("Appears to save it successfully and then loads it back", func() {
+				tmpStateDir, _ = ioutil.TempDir("", "redislabs-state-test")
+				defer os.RemoveAll(tmpStateDir)
+				persisters.GetStatePath = func() (string, error) {
+					return path.Join(tmpStateDir, "state.json"), nil
+				}
+
 				err := local.Save(&state)
 				Expect(err).NotTo(HaveOccurred())
-			})
-			It("Loads the previously saved state", func() {
 				loaded, err := local.Load()
 				Expect(err).NotTo(HaveOccurred())
-				Expect(loaded).To(Equal(state))
+				Expect(loaded).To(Equal(&state))
 			})
 		})
 	})
