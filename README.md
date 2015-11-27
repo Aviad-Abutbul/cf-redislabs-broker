@@ -36,3 +36,15 @@ git clone https://github.com/Altoros/redislabs-service-broker.git
 * `git add vendor glide.yaml` & commit
 
 Note: User `glide` with at least `0.7.2` version.
+
+### Tests
+
+```
+go test ./redislabs
+```
+
+### How to run
+
+```
+go build -o redislabs-service-broker ./cmd
+```

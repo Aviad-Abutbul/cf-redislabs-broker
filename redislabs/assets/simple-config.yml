@@ -2,8 +2,6 @@
 broker:
   username: admin
   password: pass
-  nats: 'nats//user:pass@ip:4222'
-  # database_url ?
 
 redislabs:
   auth:

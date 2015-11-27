@@ -1,7 +1,25 @@
 --
-service_id: <SERVICE_ID>
+redislabs:
+  auth:
+    password: password
+    username: username
 
-plans:
-- name: minimal
-  id: <MINIMAL_PLAN_ID>
-  description: "1 shard, no HA, no snapshots, 1gb of memory"
+broker:
+  port: 8080
+  auth:
+    password: password
+    username: username
+  service_id: <SERVICE_ID>
+  state_persister:
+    type: local
+    file: /tmp/redislabs-statefile.json
+  plans:
+  - name: minimal
+    id: <MINIMAL_PLAN_ID>
+    description: "1 shard, no HA, no snapshots, 1gb of memory"
+  - name: medium
+    id: <MEDIUM_PLAN_ID>
+    description: "1 shard, no HA, no snapshots, 1gb of memory"
+  - name: ha
+    id: <LARGE_PLAN_ID>
+    description: "1 shard, no HA, no snapshots, 1gb of memory"
