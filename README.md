@@ -34,3 +34,5 @@ git clone https://github.com/Altoros/redislabs-service-broker.git
 * `glide get github.com/<ORG>/<REPO>`
 * `find vendor -name '.git' | xargs rm -r`
 * `git add vendor glide.yaml` & commit
+
+Note: User `glide` with at least `0.7.2` version.
