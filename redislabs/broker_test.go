@@ -3,6 +3,7 @@ package redislabs_test
 import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/adapters"
+	brokerconfig "github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 
@@ -13,30 +14,32 @@ import (
 var _ = Describe("Broker", func() {
 	var (
 		broker          redislabs.ServiceBroker
-		config          redislabs.Config
+		config          brokerconfig.Config
 		instanceCreator redislabs.ServiceInstanceCreator
-		instanceBinder  redislabs.ServiceInstanceBinder
-		persister       persisters.StatePersister
+		// instanceBinder  redislabs.ServiceInstanceBinder
+		persister persisters.StatePersister
 	)
 
 	JustBeforeEach(func() {
 		broker = redislabs.ServiceBroker{
-			Config:          config,
-			InstanceCreator: instanceCreator,
-			InstanceBinder:  instanceBinder,
-			Persister:       persister,
+			Config: config,
+			// InstanceCreator: instanceCreator,
+			// InstanceBinder:  instanceBinder,
+			// Persister:       persister,
 		}
 	})
 
 	Describe("Looking for plans", func() {
 		Context("Given a config with one default plan", func() {
 			BeforeEach(func() {
-				config = redislabs.Config{
-					DefaultPlans: []redislabs.ServicePlanConfig{
-						{
-							ID:          "",
-							Name:        "test",
-							Description: "",
+				config = brokerconfig.Config{
+					ServiceBroker: brokerconfig.ServiceBrokerConfig{
+						Plans: []brokerconfig.ServicePlanConfig{
+							{
+								ID:          "",
+								Name:        "test",
+								Description: "",
+							},
 						},
 					},
 				}
@@ -57,13 +60,15 @@ var _ = Describe("Broker", func() {
 		)
 		Context("Given a config with a default plan", func() {
 			JustBeforeEach(func() {
-				config = redislabs.Config{
-					ServiceID: serviceID,
-					DefaultPlans: []redislabs.ServicePlanConfig{
-						{
-							ID:          planID,
-							Name:        "test",
-							Description: "",
+				config = brokerconfig.Config{
+					ServiceBroker: brokerconfig.ServiceBrokerConfig{
+						ServiceID: serviceID,
+						Plans: []brokerconfig.ServicePlanConfig{
+							{
+								ID:          "",
+								Name:        "test",
+								Description: "",
+							},
 						},
 					},
 				}

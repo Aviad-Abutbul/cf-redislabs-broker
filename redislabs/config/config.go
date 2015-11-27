@@ -6,17 +6,17 @@ import (
 )
 
 type Config struct {
-	Redislabs     redislabsConfiguration `yaml:"redislabs"`
-	ServiceBroker brokerConfiguration    `yaml:"broker"`
+	Redislabs     RedislabsConfig     `yaml:"redislabs"`
+	ServiceBroker ServiceBrokerConfig `yaml:"broker"`
 }
 
-type redislabsConfiguration struct {
+type RedislabsConfig struct {
 	Auth AuthConfig `yaml:"auth"`
 }
 
-type brokerConfiguration struct {
+type ServiceBrokerConfig struct {
 	Auth      AuthConfig          `yaml:"auth"`
-	Plans     []servicePlanConfig `yaml:"plans"`
+	Plans     []ServicePlanConfig `yaml:"plans"`
 	ServiceID string              `yaml:"service_id"`
 	Port      int                 `yaml:"port"`
 }
@@ -26,7 +26,7 @@ type AuthConfig struct {
 	Username string `yaml:"username"`
 }
 
-type servicePlanConfig struct {
+type ServicePlanConfig struct {
 	ID                    string                `yaml:"id"`
 	Name                  string                `yaml:"name"`
 	Description           string                `yaml:"description"`
