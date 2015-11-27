@@ -1,7 +1,7 @@
 package redislabs
 
 import (
-	"github.com/altoros/redislabs-service-broker/redislabs/persisters"
+	"github.com/altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 )
 

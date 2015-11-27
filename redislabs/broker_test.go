@@ -1,9 +1,9 @@
 package redislabs_test
 
 import (
-	"github.com/altoros/redislabs-service-broker/redislabs"
-	"github.com/altoros/redislabs-service-broker/redislabs/adapters"
-	"github.com/altoros/redislabs-service-broker/redislabs/persisters"
+	"github.com/altoros/cf-redislabs-broker/redislabs"
+	"github.com/altoros/cf-redislabs-broker/redislabs/adapters"
+	"github.com/altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 
 	. "github.com/onsi/ginkgo"
