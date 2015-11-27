@@ -4,8 +4,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/altoros/cf-redislabs-broker/redislabs/cluster"
-	"github.com/altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 )
 
 type DefaultCreator struct {
