@@ -1,12 +1,13 @@
 package redislabs
 
 import (
+	"github.com/altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 )
 
 type ServiceInstanceCreator interface {
-	Create(instanceID string, persister persisters.StatePersister) error
+	Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error
 	Destroy(instanceID string, persister persisters.StatePersister) error
 	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
 }
@@ -32,7 +33,7 @@ type ServiceBroker struct {
 
 func (b *ServiceBroker) Services() []brokerapi.Service {
 	planList := []brokerapi.ServicePlan{}
-	for _, p := range b.plans() {
+	for _, p := range b.planDescriptions() {
 		planList = append(planList, *p)
 	}
 	return []brokerapi.Service{
@@ -77,8 +78,8 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	if provisionDetails.ID != b.Config.ServiceID {
 		return brokerapi.ErrInstanceDoesNotExist
 	}
-	plansByID := b.plans()
-	if _, ok := plansByID[provisionDetails.PlanID]; !ok {
+	settingsByID := b.instanceSettings()
+	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
 		return ErrPlanDoesNotExist
 	}
 	adapter := b.InstanceCreator
@@ -89,7 +90,8 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	if persister == nil {
 		return ErrPersisterNotFound
 	}
-	return adapter.Create(instanceID, persister)
+	settings := settingsByID[provisionDetails.PlanID]
+	return adapter.Create(instanceID, *settings, persister)
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
 	// }
@@ -166,10 +168,10 @@ func (b *ServiceBroker) Unbind(instanceID, bindingID string) error {
 	// return brokerapi.ErrInstanceDoesNotExist
 }
 
-func (b *ServiceBroker) plans() map[string]*brokerapi.ServicePlan {
+func (b *ServiceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
 	plansByID := map[string]*brokerapi.ServicePlan{}
 	for _, p := range b.Config.DefaultPlans {
-		servicePlan := LoadServicePlan(p)
+		servicePlan := LoadPlanDescription(p)
 		plansByID[servicePlan.ID] = &servicePlan
 	}
 	return plansByID
@@ -208,4 +210,13 @@ func (b *ServiceBroker) plans() map[string]*brokerapi.ServicePlan {
 	// }
 
 	// return plans
+}
+
+func (b *ServiceBroker) instanceSettings() map[string]*cluster.InstanceSettings {
+	settingsByID := map[string]*cluster.InstanceSettings{}
+	for _, c := range b.Config.DefaultPlans {
+		settings := LoadInstanceSettings(c.InstanceSettings)
+		settingsByID[c.ID] = &settings
+	}
+	return settingsByID
 }

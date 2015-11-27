@@ -1,12 +1,13 @@
 package adapters
 
 import (
+	"github.com/altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/altoros/cf-redislabs-broker/redislabs/persisters"
 )
 
 type DefaultCreator struct{}
 
-func (d *DefaultCreator) Create(instanceID string, persister persisters.StatePersister) error {
+func (d *DefaultCreator) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
 	return nil
 }
 
