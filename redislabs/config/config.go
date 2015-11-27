@@ -27,10 +27,10 @@ type AuthConfig struct {
 }
 
 type servicePlanConfig struct {
-	ID               string                `yaml:"id"`
-	Name             string                `yaml:"name"`
-	Description      string                `yaml:"description"`
-	InstanceSettings ServiceInstanceConfig `yaml:"settings"`
+	ID                    string                `yaml:"id"`
+	Name                  string                `yaml:"name"`
+	Description           string                `yaml:"description"`
+	ServiceInstanceConfig ServiceInstanceConfig `yaml:"settings"`
 }
 
 type ServiceInstanceConfig struct {
@@ -39,7 +39,7 @@ type ServiceInstanceConfig struct {
 	ShardCount  int64 `yaml:"shard_count"`
 }
 
-func LoadConfigFromFile(path string) (Config, error) {
+func LoadFromFile(path string) (Config, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return Config{}, err

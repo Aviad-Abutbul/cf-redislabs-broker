@@ -2,8 +2,10 @@ package redislabs
 
 import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
+	"github.com/pivotal-golang/lager"
 )
 
 type ServiceInstanceCreator interface {
@@ -25,10 +27,11 @@ type ServiceInstanceBinder interface {
 }
 
 type ServiceBroker struct {
-	InstanceCreator ServiceInstanceCreator
-	InstanceBinder  ServiceInstanceBinder
-	Persister       persisters.StatePersister
-	Config          Config
+	// InstanceCreator ServiceInstanceCreator
+	// InstanceBinder  ServiceInstanceBinder
+	// StatePersister persisters.StatePersister
+	Config config.Config
+	Logger lager.Logger
 }
 
 func (b *ServiceBroker) Services() []brokerapi.Service {
@@ -75,23 +78,26 @@ func (b *ServiceBroker) Services() []brokerapi.Service {
 }
 
 func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
-	if provisionDetails.ID != b.Config.ServiceID {
-		return brokerapi.ErrInstanceDoesNotExist
-	}
-	settingsByID := b.instanceSettings()
-	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
-		return ErrPlanDoesNotExist
-	}
-	adapter := b.InstanceCreator
-	if adapter == nil {
-		return ErrInstanceCreatorNotFound
-	}
-	persister := b.Persister
-	if persister == nil {
-		return ErrPersisterNotFound
-	}
-	settings := settingsByID[provisionDetails.PlanID]
-	return adapter.Create(instanceID, *settings, persister)
+	// if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
+	// 	return brokerapi.ErrInstanceDoesNotExist
+	// }
+	// settingsByID := b.instanceSettings()
+	// if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
+	// 	return ErrPlanDoesNotExist
+	// }
+	// adapter := b.InstanceCreator
+	// if adapter == nil {
+	// 	return ErrInstanceCreatorNotFound
+	// }
+	// persister := b.StatePersister
+	// if persister == nil {
+	// 	return ErrPersisterNotFound
+	// }
+	// settings := settingsByID[provisionDetails.PlanID]
+	// return adapter.Create(instanceID, *settings, persister)
+
+	return nil
+
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists
 	// }
@@ -131,7 +137,7 @@ func (b *ServiceBroker) Deprovision(instanceID string) error {
 	//return brokerapi.ErrInstanceDoesNotExist
 }
 
-func (b *ServiceBroker) Bind(instanceID, bindingID string) (interface{}, error) {
+func (b *ServiceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
 	return nil, nil
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
@@ -170,53 +176,25 @@ func (b *ServiceBroker) Unbind(instanceID, bindingID string) error {
 
 func (b *ServiceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
 	plansByID := map[string]*brokerapi.ServicePlan{}
-	for _, p := range b.Config.DefaultPlans {
-		servicePlan := LoadPlanDescription(p)
-		plansByID[servicePlan.ID] = &servicePlan
+	for _, plan := range b.Config.ServiceBroker.Plans {
+		plansByID[plan.ID] = &brokerapi.ServicePlan{
+			ID:          plan.ID,
+			Name:        plan.Name,
+			Description: plan.Description,
+		}
 	}
 	return plansByID
-	// plans := map[string]*brokerapi.ServicePlan{}
-
-	// if redisLabsServiceBroker.Config.SharedEnabled() {
-	// 	plans["shared"] = &brokerapi.ServicePlan{
-	// 		ID:          redisLabsServiceBroker.Config.RedisConfiguration.SharedVMPlanID,
-	// 		Name:        PlanNameShared,
-	// 		Description: "This plan provides a single Redis process on a shared VM, which is suitable for development and testing workloads",
-	// 		Metadata: brokerapi.ServicePlanMetadata{
-	// 			Bullets: []string{
-	// 				"Each instance shares the same VM",
-	// 				"Single dedicated Redis process",
-	// 				"Suitable for development & testing workloads",
-	// 			},
-	// 			DisplayName: "Shared-VM",
-	// 		},
-	// 	}
-	// }
-
-	// if redisLabsServiceBroker.Config.DedicatedEnabled() {
-	// 	plans["dedicated"] = &brokerapi.ServicePlan{
-	// 		ID:          redisLabsServiceBroker.Config.RedisConfiguration.DedicatedVMPlanID,
-	// 		Name:        PlanNameDedicated,
-	// 		Description: "This plan provides a single Redis process on a dedicated VM, which is suitable for production workloads",
-	// 		Metadata: brokerapi.ServicePlanMetadata{
-	// 			Bullets: []string{
-	// 				"Dedicated VM per instance",
-	// 				"Single dedicated Redis process",
-	// 				"Suitable for production workloads",
-	// 			},
-	// 			DisplayName: "Dedicated-VM",
-	// 		},
-	// 	}
-	// }
-
-	// return plans
 }
 
 func (b *ServiceBroker) instanceSettings() map[string]*cluster.InstanceSettings {
 	settingsByID := map[string]*cluster.InstanceSettings{}
-	for _, c := range b.Config.DefaultPlans {
-		settings := LoadInstanceSettings(c.InstanceSettings)
-		settingsByID[c.ID] = &settings
+	for _, plan := range b.Config.ServiceBroker.Plans {
+		config := plan.ServiceInstanceConfig
+		settingsByID[plan.ID] = &cluster.InstanceSettings{
+			MemoryLimit: config.MemoryLimit,
+			Replication: config.Replication,
+			ShardCount:  config.ShardCount,
+		}
 	}
 	return settingsByID
 }
