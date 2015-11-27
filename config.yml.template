@@ -1,0 +1,7 @@
+--
+service_id: <SERVICE_ID>
+
+plans:
+- name: minimal
+  id: <MINIMAL_PLAN_ID>
+  description: "1 shard, no HA, no snapshots, 1gb of memory"
