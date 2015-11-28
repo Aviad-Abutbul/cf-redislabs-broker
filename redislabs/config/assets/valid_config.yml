@@ -6,6 +6,7 @@ redislabs:
 
 broker:
   port: 8080
+  name: redislabs
   auth:
     password: service-broker-password
     username: service-broker-username

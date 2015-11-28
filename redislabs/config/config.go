@@ -19,6 +19,7 @@ type ServiceBrokerConfig struct {
 	Plans     []ServicePlanConfig `yaml:"plans"`
 	ServiceID string              `yaml:"service_id"`
 	Port      int                 `yaml:"port"`
+	Name      string              `yaml:"name"`
 }
 
 type AuthConfig struct {

@@ -1,0 +1,5 @@
+--
+invalid-config:
+  auth:
+    password: redislabs-password
+    username: redislabs-username
