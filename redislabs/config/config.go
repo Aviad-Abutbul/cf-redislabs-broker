@@ -34,7 +34,7 @@ type ServicePlanConfig struct {
 }
 
 type ServiceInstanceConfig struct {
-	MemoryLimit int64 `yaml:"memory_limit"`
+	MemoryLimit int64 `yaml:"memory"`
 	Replication bool  `yaml:"replication"`
 	ShardCount  int64 `yaml:"shard_count"`
 }

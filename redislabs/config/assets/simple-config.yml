@@ -1,36 +1,36 @@
 --
 redislabs:
   auth:
-    password: password
-    username: username
+    password: redislabs-password
+    username: redislabs-username
 
 broker:
   port: 8080
   auth:
-    password: password
-    username: username
-  service_id: "service-id"
+    password: service-broker-password
+    username: service-broker-username
+  service_id: "redislabs-service-broker-0b814f"
   state_persister:
     file: /tmp/redislabs-statefile.json
   plans:
   - name: minimal
-    id: <MINIMAL_PLAN_ID>
+    id: rlec-minimal-plan-4fc771
     description: "1 shard, no HA, no snapshots, 1gb of memory"
     settings:
       memory: 512
       replication: false
       shard_count: 1
   - name: medium
-    id: <MEDIUM_PLAN_ID>
-    description: "1 shard, no HA, no snapshots, 1gb of memory"
+    id: rlec-medium-plan-cd673f
+    description: "1 shard, with HA, no snapshots, 2gb of memory"
     settings:
-      memory: 512
-      replication: false
+      memory: 2048
+      replication: true
       shard_count: 1
   - name: ha
-    id: <LARGE_PLAN_ID>
-    description: "1 shard, no HA, no snapshots, 1gb of memory"
+    id: rlec-large-plan-a44aa2
+    description: "3 shard, with HA, no snapshots, 20gb of memory"
     settings:
-      memory: 512
-      replication: false
-      shard_count: 1
+      memory: 20480
+      replication: true
+      shard_count: 3
