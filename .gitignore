@@ -1,0 +1,5 @@
+.envrc
+out
+pkg
+/tmp/
+*.sublime-workspace
