@@ -20,13 +20,23 @@
 
 ## Development
 
-* Clone the repo:
+### How to build
 
 ```
-git clone https://github.com/Altoros/redislabs-service-broker.git
+git clone https://github.com/Altoros/cf-redislabs-broker.git cf-redislabs-broker
+cd cf-redislabs-broker
+./bin/build
 ```
 
-* Execute `source .envrc` or `direnv allow` if you have [direnv](http://direnv.net/)
+After that you'll find resulting binary in `out/redislabs-service-broker`.
+
+### How to run
+
+```
+./out/redislabs-service-broker -c config.yml
+```
+
+You can find an sample of config file in `examples` [folder](https://github.com/Altoros/cf-redislabs-broker/tree/master/examples).
 
 ### Adding a dependency
 
@@ -35,7 +45,7 @@ git clone https://github.com/Altoros/redislabs-service-broker.git
 * `find vendor -name '.git' | xargs rm -r`
 * `git add vendor glide.yaml` & commit
 
-Note: User `glide` with at least `0.7.2` version.
+Note: use `glide` with at least `0.7.2` version.
 
 ### Tests
 
