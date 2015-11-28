@@ -27,11 +27,11 @@ type ServiceInstanceBinder interface {
 }
 
 type ServiceBroker struct {
-	// InstanceCreator ServiceInstanceCreator
-	// InstanceBinder  ServiceInstanceBinder
-	// StatePersister persisters.StatePersister
-	Config config.Config
-	Logger lager.Logger
+	InstanceCreator ServiceInstanceCreator
+	InstanceBinder  ServiceInstanceBinder
+	StatePersister  persisters.StatePersister
+	Config          config.Config
+	Logger          lager.Logger
 }
 
 func (b *ServiceBroker) Services() []brokerapi.Service {
@@ -78,25 +78,23 @@ func (b *ServiceBroker) Services() []brokerapi.Service {
 }
 
 func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
-	// if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
-	// 	return brokerapi.ErrInstanceDoesNotExist
-	// }
-	// settingsByID := b.instanceSettings()
-	// if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
-	// 	return ErrPlanDoesNotExist
-	// }
-	// adapter := b.InstanceCreator
-	// if adapter == nil {
-	// 	return ErrInstanceCreatorNotFound
-	// }
-	// persister := b.StatePersister
-	// if persister == nil {
-	// 	return ErrPersisterNotFound
-	// }
-	// settings := settingsByID[provisionDetails.PlanID]
-	// return adapter.Create(instanceID, *settings, persister)
-
-	return nil
+	if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
+		return brokerapi.ErrInstanceDoesNotExist
+	}
+	settingsByID := b.instanceSettings()
+	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
+		return ErrPlanDoesNotExist
+	}
+	adapter := b.InstanceCreator
+	if adapter == nil {
+		return ErrInstanceCreatorNotFound
+	}
+	persister := b.StatePersister
+	if persister == nil {
+		return ErrPersisterNotFound
+	}
+	settings := settingsByID[provisionDetails.PlanID]
+	return adapter.Create(instanceID, *settings, persister)
 
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
 	// 	return brokerapi.ErrInstanceAlreadyExists

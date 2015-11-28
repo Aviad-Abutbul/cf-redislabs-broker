@@ -1,4 +1,4 @@
-package adapters
+package instancecreators
 
 import (
 	"errors"
@@ -8,11 +8,11 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 )
 
-type DefaultCreator struct {
+type Default struct {
 	sync.Mutex
 }
 
-func (d *DefaultCreator) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
+func (d *Default) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
 	d.Lock()
 	defer d.Unlock()
 
@@ -33,10 +33,10 @@ func (d *DefaultCreator) Create(instanceID string, settings cluster.InstanceSett
 	return nil
 }
 
-func (d *DefaultCreator) Destroy(instanceID string, persister persisters.StatePersister) error {
+func (d *Default) Destroy(instanceID string, persister persisters.StatePersister) error {
 	return nil
 }
 
-func (d *DefaultCreator) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
+func (d *Default) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
 	return false, nil
 }
