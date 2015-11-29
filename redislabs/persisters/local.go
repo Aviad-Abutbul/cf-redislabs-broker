@@ -4,28 +4,33 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-	"path"
+	"path/filepath"
+	"sync"
 )
 
 var (
-	BrokerFolder  = ".redislabs-broker"
-	StateFile     = "state.json"
-	StateFileMask = os.FileMode(0777)
+	stateFileMask = os.FileMode(0777)
 )
 
 // Local implements StatePersister and stores the broker state
 // in a JSON file in the file system.
-type Local struct{}
+type local struct {
+	stateFilePath string
+	lock          sync.Mutex
+}
 
 // Load loads the state from the local JSON file. If such file
 // does not exist (no Save has been made to date) it returns an empty state.
-func (l *Local) Load() (*State, error) {
-	p, err := GetStatePath()
+func (l *local) Load() (*State, error) {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
 	// Return an empty state if the file does not exist.
-	if _, err = os.Stat(p); os.IsNotExist(err) {
+	if _, err := os.Stat(l.stateFilePath); os.IsNotExist(err) {
 		return &State{}, nil
 	}
-	bytes, err := ioutil.ReadFile(p)
+
+	bytes, err := ioutil.ReadFile(l.stateFilePath)
 	if err != nil {
 		return nil, err
 	}
@@ -39,30 +44,36 @@ func (l *Local) Load() (*State, error) {
 
 // Save saves the state to the local JSON file. It creates it if it does not
 // exist.
-func (l *Local) Save(s *State) error {
-	p, err := GetStatePath()
+func (l *local) Save(s *State) error {
+	l.lock.Lock()
+	defer l.lock.Unlock()
+
+	stateFileFolder, err := filepath.Abs(filepath.Dir(l.stateFilePath))
 	if err != nil {
 		return err
 	}
+
+	err = os.MkdirAll(stateFileFolder, stateFileMask)
+	if err != nil {
+		return err
+	}
+
 	bytes, err := json.Marshal(s)
 	if err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(p, bytes, StateFileMask); err != nil {
+
+	err = ioutil.WriteFile(l.stateFilePath, bytes, stateFileMask)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// GetStatePath returns the file path for the state file. The function
-// should be overriden in tests.
-var GetStatePath = func() (string, error) {
-	home := path.Join(os.Getenv("HOME"), BrokerFolder)
-	// Create home directory if it does not exist.
-	if _, err := os.Stat(home); os.IsNotExist(err) {
-		if err := os.MkdirAll(home, StateFileMask); err != nil {
-			return "", err
-		}
+// discussed here:
+// https://github.com/Altoros/cf-redislabs-broker/commit/c34e4a3e6dfb9eb44442b9069ea9548770957ba5
+func NewLocalPersister(path string) StatePersister {
+	return &local{
+		stateFilePath: path,
 	}
-	return path.Join(home, StateFile), nil
 }
