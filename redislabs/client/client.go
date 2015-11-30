@@ -1,24 +1,28 @@
 package client
 
 import (
-	"encoding/json"
-	"fmt"
 	conf "github.com/Altoros/cf-redislabs-broker/redislabs/config"
-	"github.com/cloudfoundry/bosh-utils/httpclient"
-	"io/ioutil"
-	"net/http"
-	"net/url"
+	"github.com/pivotal-golang/lager"
 )
 
 type RedislabsClient struct {
 	config     *conf.RedislabsConfig
 	httpClient *httpClient
-	logger     *lager.Logger
+	logger     lager.Logger
 }
 
-func NewRedislabsClient(config *conf.RedislabsConfig, logger lager.Logger) RedislabsClient {
-	logger.Info("Creating new redislabs client", lager.Data{address: address, port: port})
-	httpClient := newHTTPClient(config.Address, config.Port)
+func NewRedislabsClient(config *conf.RedislabsConfig, logger lager.Logger) *RedislabsClient {
+	logger.Info("Creating new redislabs client", lager.Data{
+		"address": config.Address,
+		"port":    config.Port,
+	})
+	httpClient := newHTTPClient(
+		config.Auth.Username,
+		config.Auth.Password,
+		config.Address,
+		config.Port,
+		logger,
+	)
 	return &RedislabsClient{
 		config:     config,
 		logger:     logger,

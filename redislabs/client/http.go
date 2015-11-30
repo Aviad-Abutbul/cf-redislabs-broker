@@ -1,12 +1,20 @@
 package client
 
 import (
-	"github.com/pivotal-golang/lager"
+	"crypto/tls"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
+	"time"
+
+	"github.com/pivotal-golang/lager"
 )
 
-var defaultClient = http.Client{
+var defaultClient = &http.Client{
 	Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		Proxy:           http.ProxyFromEnvironment,
@@ -24,13 +32,13 @@ type httpPayload []byte
 type httpClient struct {
 	password string
 	username string
-	address string
-	port    int
-	logger  *lager.Logger
-	client  *http.Client
+	address  string
+	port     int
+	logger   lager.Logger
+	client   *http.Client
 }
 
-func (c *httpClient) performRequest(verb string, path string, params httpParams, payload httpPayload) (http.Response, error) {
+func (c *httpClient) performRequest(verb string, path string, params httpParams, payload httpPayload) (*http.Response, error) {
 	c.logger.Info(
 		"performing-http-request",
 		lager.Data{
@@ -44,39 +52,41 @@ func (c *httpClient) performRequest(verb string, path string, params httpParams,
 	requestURL := c.buildFullRequestURL(path, params)
 	req, err := http.NewRequest(verb, requestURL, nil)
 	if err != nil {
-		return nil, err
+		return &http.Response{}, err
 	}
 	req.SetBasicAuth(c.username, c.password)
-	return c.httpClient.Do(req)
+	return c.client.Do(req)
 }
 
-func (c *RedislabsClient) put(path string, payload httpPayload) (*http.Response, error) {
-	response, err := c.performRequest("PUT", path, httpParams{}, payload)
+func (c *httpClient) put(endpoint string, payload httpPayload) (*http.Response, error) {
+	response, err := c.performRequest("PUT", endpoint, httpParams{}, payload)
 	if err != nil {
-		Logger.Fatal("Performing PUT request", err, lager.Data{
-			"endoint": endpoint, "payload": payload
+		c.logger.Fatal("Performing PUT request", err, lager.Data{
+			"endoint": endpoint,
+			"payload": payload,
 		})
 		return nil, err
 	}
 	return response, nil
 }
 
-func (c *RedislabsClient) post(endpoint string, payload httpPayload) (*http.Response, error) {
-	response, err := c.performRequest("POST", path, httpParams{}, payload)
+func (c *httpClient) post(endpoint string, payload httpPayload) (*http.Response, error) {
+	response, err := c.performRequest("POST", endpoint, httpParams{}, payload)
 	if err != nil {
-		Logger.Fatal("Performing POST request", err, lager.Data{
-			"endoint": endpoint, "payload": payload
+		c.logger.Fatal("Performing POST request", err, lager.Data{
+			"endoint": endpoint,
+			"payload": payload,
 		})
 		return nil, err
 	}
 	return response, nil
 }
 
-func (c *httpClient) get(path string, params httpParams) (*http.Response, error) {
-	response, err := c.performRequest("GET", path, params, httpPayload{})
+func (c *httpClient) get(endpoint string, params httpParams) (*http.Response, error) {
+	response, err := c.performRequest("GET", endpoint, params, httpPayload{})
 	if err != nil {
-		Logger.Fatal("Performing GET request", err, lager.Data{
-			"endoint": endpoint, "payload": payload
+		c.logger.Fatal("Performing GET request", err, lager.Data{
+			"endoint": endpoint,
 		})
 		return nil, err
 	}
@@ -85,7 +95,7 @@ func (c *httpClient) get(path string, params httpParams) (*http.Response, error)
 
 // TODO: remove following comment
 // playground https://play.golang.org/p/juw99Hp9yF
-func (c *httpClient) buildFullRequestURL(path string, params httpParams) {
+func (c *httpClient) buildFullRequestURL(path string, params httpParams) string {
 	base_url, _ := url.Parse(c.address)
 	endpoint, _ := base_url.Parse(path)
 	query := endpoint.Query()
@@ -96,14 +106,11 @@ func (c *httpClient) buildFullRequestURL(path string, params httpParams) {
 	return endpoint.String()
 }
 
-res, err := httpClient.get()
-client.parseResponse(res, Database)
-
 // parse the response
 func parseJSONResponse(response *http.Response, result interface{}) error {
 	//read the response
 	bytes, err := ioutil.ReadAll(response.Body)
-	if error != nil {
+	if err != nil {
 		return err
 	}
 
@@ -124,12 +131,14 @@ func parseJSONResponse(response *http.Response, result interface{}) error {
 	return nil
 }
 
-func newHTTPClient(username string, password string, address string, port int, logger *lager.Logger) httpClient {
-	logger.Info("Creating new http client", lager.Data{address: address, port: port})
+func newHTTPClient(username string, password string, address string, port int, logger lager.Logger) *httpClient {
+	logger.Info("Creating new http client", lager.Data{"address": address, "port": port})
 	return &httpClient{
-		address: address,
-		port: port,
-		logger: logger,
-		client: defaultClient
+		username: username,
+		password: password,
+		address:  address,
+		port:     port,
+		logger:   logger,
+		client:   defaultClient,
 	}
 }
