@@ -7,6 +7,8 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
+	"io/ioutil"
+	"os"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -120,12 +122,23 @@ var _ = Describe("Broker", func() {
 			})
 
 			PContext("And given proper settings", func() {
+				var (
+					tmpStateDir string
+				)
+
 				BeforeEach(func() {
 					requestedServiceID = serviceID
 					requestedPlanID = planID
-					// instanceCreator = &adapters.Default{}
-					persister = &persisters.Local{}
+					var err error
+					tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
+					Expect(err).NotTo(HaveOccurred())
+					persister = persisters.NewLocalPersister("./tmp/state.json")
 				})
+
+				AfterEach(func() {
+					os.RemoveAll(tmpStateDir)
+				})
+
 				It("Creates an instance of the configured default plan", func() {
 					err := broker.Provision("some-id", details)
 					Expect(err).ToNot(HaveOccurred())
