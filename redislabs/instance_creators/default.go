@@ -1,7 +1,7 @@
 package instancecreators
 
 import (
-	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
@@ -20,19 +20,43 @@ func (d *Default) Create(instanceID string, settings cluster.InstanceSettings, p
 	d.lock.Lock()
 	defer d.lock.Unlock()
 
+	// Load the broker state.
+	d.logger.Info("Loading the broker state", lager.Data{
+		"instance-id": instanceID,
+	})
 	state, err := persister.Load()
 	if err != nil {
-		return errors.New("") // TODO
+		d.logger.Fatal("Failed to load the broker state", err)
+		return ErrFailedToLoadState
 	}
 
-	// check if instance exists
+	// Check whether the instance already exists.
+	for _, s := range (*state).AvailableInstances {
+		if s.ID == instanceID {
+			d.logger.Error(fmt.Sprintf("Received a request to create an instance with ID %s that already exists", instanceID), ErrInstanceExists)
+			return ErrInstanceExists
+		}
+	}
 
-	// make an API request
+	// Ask the cluster to create a database.
+	d.logger.Info("Creating a database", lager.Data{
+		"instance-id": instanceID,
+	})
+	if err = d.createDatabase(); err != nil {
+		return ErrFailedToCreateDatabase
+	}
 
-	// update state
-
+	s := persisters.ServiceInstance{
+		ID: instanceID,
+	}
+	(*state).AvailableInstances = append((*state).AvailableInstances, s)
+	// Save the new state.
+	d.logger.Info("Saving the broker state", lager.Data{
+		"instance-id": instanceID,
+	})
 	if err = persister.Save(state); err != nil {
-		return errors.New("") // TODO
+		d.logger.Error("Failed to save the new state", err)
+		return ErrFailedToSaveState
 	}
 	return nil
 }
@@ -43,4 +67,8 @@ func (d *Default) Destroy(instanceID string, persister persisters.StatePersister
 
 func (d *Default) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
 	return false, nil
+}
+
+func (d *Default) createDatabase() error {
+	return nil
 }
