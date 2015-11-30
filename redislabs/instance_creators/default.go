@@ -5,11 +5,15 @@ import (
 	"sync"
 
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/pivotal-golang/lager"
 )
 
 type Default struct {
-	lock sync.Mutex
+	lock   sync.Mutex
+	logger lager.Logger
+	config config.Config
 }
 
 func (d *Default) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
