@@ -20,27 +20,30 @@
 
 ## Development
 
+### Configuring the environment
+
+* Get the code:
+```
+git clone https://github.com/Altoros/cf-redislabs-broker.git
+cd cf-redislabs-broker
+```
 * Install Go 1.5
 * [Ensure your GOPATH is set correctly](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable)
 * In managing dependencies, we rely on Go 1.5 Vendor Experiment. Therefore, set up a `GO15VENDOREXPERIMENT` variable to equal `1`. `/bin/env` script can do it for you.
 
-### How to build
+### Building the binary
 
 ```
-git clone https://github.com/Altoros/cf-redislabs-broker.git cf-redislabs-broker
-cd cf-redislabs-broker
 ./bin/build
 ```
 
-After that you'll find resulting binary in `out/redislabs-service-broker`.
+After that you'll find the resulting binary in `out/redislabs-service-broker`.
 
-### How to run
+### Running unit tests
 
 ```
-./out/redislabs-service-broker -c config.yml
+go test ./redislabs/...
 ```
-
-You can find an sample of config file in `examples` [folder](https://github.com/Altoros/cf-redislabs-broker/tree/master/examples).
 
 ### Adding a dependency
 
@@ -51,14 +54,10 @@ You can find an sample of config file in `examples` [folder](https://github.com/
 
 Note: use `glide` with at least `0.7.2` version.
 
-### Tests
+### Starting the service
 
 ```
-go test ./redislabs/...
+./out/redislabs-service-broker -c config.yml
 ```
 
-### How to run
-
-```
-go build -o redislabs-service-broker ./cmd
-```
+You can find a sample of the config file in an `examples` [folder](https://github.com/Altoros/cf-redislabs-broker/tree/master/examples).
