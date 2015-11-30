@@ -9,12 +9,12 @@ import (
 )
 
 type Default struct {
-	sync.Mutex
+	lock sync.Mutex
 }
 
 func (d *Default) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
-	d.Lock()
-	defer d.Unlock()
+	d.lock.Lock()
+	defer d.lock.Unlock()
 
 	state, err := persister.Load()
 	if err != nil {

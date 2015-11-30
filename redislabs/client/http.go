@@ -19,9 +19,11 @@ var defaultClient = http.Client{
 }
 
 type httpParams map[string]string
-type httpPayload map[string]string
+type httpPayload []byte
 
 type httpClient struct {
+	password string
+	username string
 	address string
 	port    int
 	logger  *lager.Logger
@@ -38,17 +40,17 @@ func (c *httpClient) performRequest(verb string, path string, params httpParams,
 			"payload": payload,
 		},
 	)
-	// TODO: validate inputs
+	// TODO: validate inputs (for instance verb)
 	requestURL := c.buildFullRequestURL(path, params)
-	req, err := http.NewRequest("GET", requestURL, nil)
+	req, err := http.NewRequest(verb, requestURL, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	req.SetBasicAuth(p.username, p.password)
+	req.SetBasicAuth(c.username, c.password)
 	return c.httpClient.Do(req)
 }
 
-func (c *RedislabsClient) put(path string, payload []byte) (*http.Response, error) {
+func (c *RedislabsClient) put(path string, payload httpPayload) (*http.Response, error) {
 	response, err := c.performRequest("PUT", path, httpParams{}, payload)
 	if err != nil {
 		Logger.Fatal("Performing PUT request", err, lager.Data{
@@ -59,7 +61,7 @@ func (c *RedislabsClient) put(path string, payload []byte) (*http.Response, erro
 	return response, nil
 }
 
-func (c *RedislabsClient) post(endpoint string, payload []byte) (*http.Response, error) {
+func (c *RedislabsClient) post(endpoint string, payload httpPayload) (*http.Response, error) {
 	response, err := c.performRequest("POST", path, httpParams{}, payload)
 	if err != nil {
 		Logger.Fatal("Performing POST request", err, lager.Data{
@@ -71,7 +73,7 @@ func (c *RedislabsClient) post(endpoint string, payload []byte) (*http.Response,
 }
 
 func (c *httpClient) get(path string, params httpParams) (*http.Response, error) {
-	response, err := c.performRequest("GET", path, httpParams{}, payload)
+	response, err := c.performRequest("GET", path, params, httpPayload{})
 	if err != nil {
 		Logger.Fatal("Performing GET request", err, lager.Data{
 			"endoint": endpoint, "payload": payload
@@ -94,9 +96,11 @@ func (c *httpClient) buildFullRequestURL(path string, params httpParams) {
 	return endpoint.String()
 }
 
-// parse the response
-func parseResponse(response *http.Response, result interface{}) error {
+res, err := httpClient.get()
+client.parseResponse(res, Database)
 
+// parse the response
+func parseJSONResponse(response *http.Response, result interface{}) error {
 	//read the response
 	bytes, err := ioutil.ReadAll(response.Body)
 	if error != nil {
@@ -120,7 +124,7 @@ func parseResponse(response *http.Response, result interface{}) error {
 	return nil
 }
 
-func newHTTPClient(address string, port int, logger *lager.Logger) httpClient {
+func newHTTPClient(username string, password string, address string, port int, logger *lager.Logger) httpClient {
 	logger.Info("Creating new http client", lager.Data{address: address, port: port})
 	return &httpClient{
 		address: address,
