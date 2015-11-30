@@ -3,7 +3,6 @@ package client
 import (
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -96,8 +95,8 @@ func (c *httpClient) get(endpoint string, params httpParams) (*http.Response, er
 // TODO: remove following comment
 // playground https://play.golang.org/p/juw99Hp9yF
 func (c *httpClient) buildFullRequestURL(path string, params httpParams) string {
-	base_url, _ := url.Parse(c.address)
-	endpoint, _ := base_url.Parse(path)
+	baseURL, _ := url.Parse(c.address)
+	endpoint, _ := baseURL.Parse(path)
 	query := endpoint.Query()
 	for key, value := range params {
 		query.Set(key, value)
@@ -125,7 +124,7 @@ func parseJSONResponse(response *http.Response, result interface{}) error {
 
 	//check whether the response is a bad request
 	if response.StatusCode == 400 {
-		return errors.New(fmt.Sprintf("Bad Request: %s", string(bytes)))
+		return fmt.Errorf("Bad Request: %s", string(bytes))
 	}
 
 	return nil
