@@ -10,13 +10,20 @@ import (
 	"github.com/pivotal-golang/lager"
 )
 
-type Default struct {
+type defaultCreator struct {
 	lock   sync.Mutex
 	logger lager.Logger
 	config config.Config
 }
 
-func (d *Default) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
+func NewDefault(config config.Config, logger lager.Logger) *defaultCreator {
+	return &defaultCreator{
+		config: config,
+		logger: logger,
+	}
+}
+
+func (d *defaultCreator) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 
@@ -61,14 +68,14 @@ func (d *Default) Create(instanceID string, settings cluster.InstanceSettings, p
 	return nil
 }
 
-func (d *Default) Destroy(instanceID string, persister persisters.StatePersister) error {
+func (d *defaultCreator) Destroy(instanceID string, persister persisters.StatePersister) error {
 	return nil
 }
 
-func (d *Default) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
+func (d *defaultCreator) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
 	return false, nil
 }
 
-func (d *Default) createDatabase() error {
+func (d *defaultCreator) createDatabase() error {
 	return nil
 }
