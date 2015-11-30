@@ -70,8 +70,6 @@ func (l *local) Save(s *State) error {
 	return nil
 }
 
-// discussed here:
-// https://github.com/Altoros/cf-redislabs-broker/commit/c34e4a3e6dfb9eb44442b9069ea9548770957ba5
 func NewLocalPersister(path string) StatePersister {
 	return &local{
 		stateFilePath: path,
