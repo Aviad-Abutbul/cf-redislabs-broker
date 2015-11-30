@@ -20,6 +20,10 @@
 
 ## Development
 
+* Install Go 1.5
+* [Ensure your GOPATH is set correctly](https://golang.org/cmd/go/#hdr-GOPATH_environment_variable)
+* In managing dependencies, we rely on Go 1.5 Vendor Experiment. Therefore, set up a `GO15VENDOREXPERIMENT` variable to equal `1`. `/bin/env` script can do it for you.
+
 ### How to build
 
 ```
