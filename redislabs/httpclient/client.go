@@ -27,6 +27,11 @@ var defaultClient = &http.Client{
 
 type HTTPParams map[string]string
 type HTTPPayload []byte
+type HTTPClient interface {
+	Get(endpoint string, params HTTPParams) (*http.Response, error)
+	Post(endpoint string, payload HTTPPayload) (*http.Response, error)
+	Put(endpoint string, payload HTTPPayload) (*http.Response, error)
+}
 
 type httpClient struct {
 	password string
