@@ -102,7 +102,7 @@ func (c *httpClient) buildFullRequestURL(path string, params HTTPParams) string 
 
 func (c *httpClient) performRequest(verb string, path string, params HTTPParams, payload HTTPPayload) (*http.Response, error) {
 	c.logger.Info(
-		"performing-http-request",
+		"Preparing to perform a request",
 		lager.Data{
 			"verb":    verb,
 			"path":    path,
