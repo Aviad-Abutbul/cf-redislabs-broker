@@ -30,7 +30,7 @@ type (
 		logger   lager.Logger
 		client   *http.Client
 	}
-}
+)
 
 var defaultClient = &http.Client{
 	Transport: &http.Transport{
