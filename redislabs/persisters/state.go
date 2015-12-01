@@ -1,5 +1,7 @@
 package persisters
 
+import "github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
+
 // StatePersister is responsible for saving & retrieving
 // the broker state, the information about available service
 // instances and their parameters.
@@ -13,8 +15,6 @@ type State struct {
 }
 
 type ServiceInstance struct {
-	ID       string
-	Port     int64
-	IPList   []string
-	Password string
+	ID          string
+	Credentials cluster.InstanceCredentials
 }
