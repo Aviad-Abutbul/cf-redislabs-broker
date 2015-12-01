@@ -14,9 +14,9 @@ import (
 )
 
 type (
-	HTTPParams map[string]string
+	HTTPParams  map[string]string
 	HTTPPayload []byte
-	HTTPClient interface {
+	HTTPClient  interface {
 		Get(endpoint string, params HTTPParams) (*http.Response, error)
 		Post(endpoint string, payload HTTPPayload) (*http.Response, error)
 		Put(endpoint string, payload HTTPPayload) (*http.Response, error)
