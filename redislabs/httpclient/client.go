@@ -13,6 +13,25 @@ import (
 	"github.com/pivotal-golang/lager"
 )
 
+type (
+	HTTPParams map[string]string
+	HTTPPayload []byte
+	HTTPClient interface {
+		Get(endpoint string, params HTTPParams) (*http.Response, error)
+		Post(endpoint string, payload HTTPPayload) (*http.Response, error)
+		Put(endpoint string, payload HTTPPayload) (*http.Response, error)
+	}
+
+	httpClient struct {
+		password string
+		username string
+		address  string
+		port     int
+		logger   lager.Logger
+		client   *http.Client
+	}
+}
+
 var defaultClient = &http.Client{
 	Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // TODO: make it configurable
@@ -25,41 +44,17 @@ var defaultClient = &http.Client{
 	},
 }
 
-type HTTPParams map[string]string
-type HTTPPayload []byte
-type HTTPClient interface {
-	Get(endpoint string, params HTTPParams) (*http.Response, error)
-	Post(endpoint string, payload HTTPPayload) (*http.Response, error)
-	Put(endpoint string, payload HTTPPayload) (*http.Response, error)
-}
-
-type httpClient struct {
-	password string
-	username string
-	address  string
-	port     int
-	logger   lager.Logger
-	client   *http.Client
-}
-
-func (c *httpClient) performRequest(verb string, path string, params HTTPParams, payload HTTPPayload) (*http.Response, error) {
-	c.logger.Info(
-		"performing-http-request",
-		lager.Data{
-			"verb":    verb,
-			"path":    path,
-			"params":  params,
-			"payload": payload,
-		},
-	)
-	// TODO: validate inputs (for instance verb)
-	requestURL := c.buildFullRequestURL(path, params)
-	req, err := http.NewRequest(verb, requestURL, nil)
-	if err != nil {
-		return &http.Response{}, err
+// New returns a client that implements HTTPClient interface.
+func New(username string, password string, address string, port int, logger lager.Logger) *httpClient {
+	logger.Info("Creating new http client", lager.Data{"address": address, "port": port})
+	return &httpClient{
+		username: username,
+		password: password,
+		address:  address,
+		port:     port,
+		logger:   logger,
+		client:   defaultClient,
 	}
-	req.SetBasicAuth(c.username, c.password)
-	return c.client.Do(req)
 }
 
 func (c *httpClient) Put(endpoint string, payload HTTPPayload) (*http.Response, error) {
@@ -110,6 +105,26 @@ func (c *httpClient) buildFullRequestURL(path string, params HTTPParams) string 
 	return endpoint.String()
 }
 
+func (c *httpClient) performRequest(verb string, path string, params HTTPParams, payload HTTPPayload) (*http.Response, error) {
+	c.logger.Info(
+		"performing-http-request",
+		lager.Data{
+			"verb":    verb,
+			"path":    path,
+			"params":  params,
+			"payload": payload,
+		},
+	)
+	// TODO: validate inputs (for instance verb)
+	requestURL := c.buildFullRequestURL(path, params)
+	req, err := http.NewRequest(verb, requestURL, nil)
+	if err != nil {
+		return &http.Response{}, err
+	}
+	req.SetBasicAuth(c.username, c.password)
+	return c.client.Do(req)
+}
+
 // parse the response
 func parseJSONResponse(response *http.Response, result interface{}) error {
 	//read the response
@@ -133,16 +148,4 @@ func parseJSONResponse(response *http.Response, result interface{}) error {
 	}
 
 	return nil
-}
-
-func New(username string, password string, address string, port int, logger lager.Logger) *httpClient {
-	logger.Info("Creating new http client", lager.Data{"address": address, "port": port})
-	return &httpClient{
-		username: username,
-		password: password,
-		address:  address,
-		port:     port,
-		logger:   logger,
-		client:   defaultClient,
-	}
 }
