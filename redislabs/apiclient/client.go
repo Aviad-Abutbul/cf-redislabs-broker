@@ -23,7 +23,7 @@ type (
 
 	errorResponse struct {
 		ErrorMessage string `json:"description"`
-		ErrorCode    string `json:error_code`
+		ErrorCode    string `json:"error_code"`
 	}
 
 	statusResponse struct {
