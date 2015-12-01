@@ -121,6 +121,7 @@ func (c *apiClient) httpClient() httpclient.HTTPClient {
 func (c *apiClient) parseErrorResponse(res *http.Response) (errorResponse, error) {
 	payload := errorResponse{}
 	bytes, err := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 	if err == nil {
 		err = json.Unmarshal(bytes, &payload)
 	}
@@ -135,6 +136,7 @@ func (c *apiClient) parseErrorResponse(res *http.Response) (errorResponse, error
 func (c *apiClient) parseStatusResponse(res *http.Response) (statusResponse, error) {
 	payload := statusResponse{}
 	bytes, err := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
 	if err == nil {
 		err = json.Unmarshal(bytes, &payload)
 	}
