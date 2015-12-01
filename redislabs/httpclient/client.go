@@ -92,8 +92,6 @@ func (c *httpClient) Get(endpoint string, params HTTPParams) (*http.Response, er
 	return response, nil
 }
 
-// TODO: remove following comment
-// playground https://play.golang.org/p/juw99Hp9yF
 func (c *httpClient) buildFullRequestURL(path string, params HTTPParams) string {
 	baseURL, _ := url.Parse(c.address)
 	endpoint, _ := baseURL.Parse(path)
