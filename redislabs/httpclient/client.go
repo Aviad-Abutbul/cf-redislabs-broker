@@ -25,8 +25,8 @@ var defaultClient = &http.Client{
 	},
 }
 
-type httpParams map[string]string
-type httpPayload []byte
+type HTTPParams map[string]string
+type HTTPPayload []byte
 
 type httpClient struct {
 	password string
@@ -37,7 +37,7 @@ type httpClient struct {
 	client   *http.Client
 }
 
-func (c *httpClient) performRequest(verb string, path string, params httpParams, payload httpPayload) (*http.Response, error) {
+func (c *httpClient) performRequest(verb string, path string, params HTTPParams, payload HTTPPayload) (*http.Response, error) {
 	c.logger.Info(
 		"performing-http-request",
 		lager.Data{
@@ -57,8 +57,8 @@ func (c *httpClient) performRequest(verb string, path string, params httpParams,
 	return c.client.Do(req)
 }
 
-func (c *httpClient) put(endpoint string, payload httpPayload) (*http.Response, error) {
-	response, err := c.performRequest("PUT", endpoint, httpParams{}, payload)
+func (c *httpClient) Put(endpoint string, payload HTTPPayload) (*http.Response, error) {
+	response, err := c.performRequest("PUT", endpoint, HTTPParams{}, payload)
 	if err != nil {
 		c.logger.Fatal("Performing PUT request", err, lager.Data{
 			"endoint": endpoint,
@@ -69,8 +69,8 @@ func (c *httpClient) put(endpoint string, payload httpPayload) (*http.Response, 
 	return response, nil
 }
 
-func (c *httpClient) post(endpoint string, payload httpPayload) (*http.Response, error) {
-	response, err := c.performRequest("POST", endpoint, httpParams{}, payload)
+func (c *httpClient) Post(endpoint string, payload HTTPPayload) (*http.Response, error) {
+	response, err := c.performRequest("POST", endpoint, HTTPParams{}, payload)
 	if err != nil {
 		c.logger.Fatal("Performing POST request", err, lager.Data{
 			"endoint": endpoint,
@@ -81,8 +81,8 @@ func (c *httpClient) post(endpoint string, payload httpPayload) (*http.Response,
 	return response, nil
 }
 
-func (c *httpClient) get(endpoint string, params httpParams) (*http.Response, error) {
-	response, err := c.performRequest("GET", endpoint, params, httpPayload{})
+func (c *httpClient) Get(endpoint string, params HTTPParams) (*http.Response, error) {
+	response, err := c.performRequest("GET", endpoint, params, HTTPPayload{})
 	if err != nil {
 		c.logger.Fatal("Performing GET request", err, lager.Data{
 			"endoint": endpoint,
@@ -94,7 +94,7 @@ func (c *httpClient) get(endpoint string, params httpParams) (*http.Response, er
 
 // TODO: remove following comment
 // playground https://play.golang.org/p/juw99Hp9yF
-func (c *httpClient) buildFullRequestURL(path string, params httpParams) string {
+func (c *httpClient) buildFullRequestURL(path string, params HTTPParams) string {
 	baseURL, _ := url.Parse(c.address)
 	endpoint, _ := baseURL.Parse(path)
 	query := endpoint.Query()
@@ -130,7 +130,7 @@ func parseJSONResponse(response *http.Response, result interface{}) error {
 	return nil
 }
 
-func newHTTPClient(username string, password string, address string, port int, logger lager.Logger) *httpClient {
+func New(username string, password string, address string, port int, logger lager.Logger) *httpClient {
 	logger.Info("Creating new http client", lager.Data{"address": address, "port": port})
 	return &httpClient{
 		username: username,
