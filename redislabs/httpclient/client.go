@@ -2,9 +2,6 @@ package httpclient
 
 import (
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -121,29 +118,4 @@ func (c *httpClient) performRequest(verb string, path string, params HTTPParams,
 	}
 	req.SetBasicAuth(c.username, c.password)
 	return c.client.Do(req)
-}
-
-// parse the response
-func parseJSONResponse(response *http.Response, result interface{}) error {
-	//read the response
-	bytes, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-
-	// close the body when done reading
-	defer response.Body.Close()
-
-	//parse JSON
-	err = json.Unmarshal(bytes, result)
-	if err != nil {
-		return err
-	}
-
-	//check whether the response is a bad request
-	if response.StatusCode == 400 {
-		return fmt.Errorf("Bad Request: %s", string(bytes))
-	}
-
-	return nil
 }
