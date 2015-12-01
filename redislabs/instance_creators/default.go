@@ -16,6 +16,10 @@ type defaultCreator struct {
 	conf   config.Config
 }
 
+var (
+	WaitingForDatabaseTimeout = 15 //seconds
+)
+
 func NewDefault(conf config.Config, logger lager.Logger) *defaultCreator {
 	return &defaultCreator{
 		conf:   conf,
@@ -49,15 +53,17 @@ func (d *defaultCreator) Create(instanceID string, settings cluster.InstanceSett
 	d.logger.Info("Creating a database", lager.Data{
 		"instance-id": instanceID,
 	})
-	if err = d.createDatabase(); err != nil {
-		return ErrFailedToCreateDatabase
+	credentials, err := d.createDatabase(settings)
+	if err != nil {
+		return err
 	}
 
-	s := persisters.ServiceInstance{
-		ID: instanceID,
+	// Save the new state.
+	s := persisters.ServiceInstance{ // the future state
+		ID:          instanceID,
+		Credentials: credentials,
 	}
 	(*state).AvailableInstances = append((*state).AvailableInstances, s)
-	// Save the new state.
 	d.logger.Info("Saving the broker state", lager.Data{
 		"instance-id": instanceID,
 	})
@@ -76,6 +82,21 @@ func (d *defaultCreator) InstanceExists(instanceID string, persister persisters.
 	return false, nil
 }
 
-func (d *defaultCreator) createDatabase() error {
-	return nil
+func (d *defaultCreator) createDatabase(settings cluster.InstanceSettings) (cluster.InstanceCredentials, error) {
+	return cluster.InstanceCredentials{}, nil
+	// api := apiclient.New(d.conf, d.logger)
+	// ch, err := api.CreateDatabase(settings)
+	// if err != nil {
+	// 	return cluster.InstanceCredentials{}, ErrFailedToCreateDatabase
+	// }
+	//
+	// for {
+	// 	select {
+	// 	case credentials := <-ch:
+	// 		return credentials, nil
+	// 	case <-time.After(time.Second * time.Duration(WaitingForDatabaseTimeout)):
+	// 		d.logger.Error("Waiting for a database timeout is expired", ErrCreateDatabaseTimeoutExpired)
+	// 		return cluster.InstanceCredentials{}, ErrCreateDatabaseTimeoutExpired
+	// 	}
+	// }
 }
