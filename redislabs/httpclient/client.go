@@ -110,7 +110,6 @@ func (c *httpClient) performRequest(verb string, path string, params HTTPParams,
 			"payload": payload,
 		},
 	)
-	// TODO: validate inputs (for instance verb)
 	requestURL := c.buildFullRequestURL(path, params)
 	req, err := http.NewRequest(verb, requestURL, nil)
 	if err != nil {
