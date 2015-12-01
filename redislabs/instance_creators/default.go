@@ -13,12 +13,12 @@ import (
 type defaultCreator struct {
 	lock   sync.Mutex
 	logger lager.Logger
-	config config.Config
+	conf   config.Config
 }
 
-func NewDefault(config config.Config, logger lager.Logger) *defaultCreator {
+func NewDefault(conf config.Config, logger lager.Logger) *defaultCreator {
 	return &defaultCreator{
-		config: config,
+		conf:   conf,
 		logger: logger,
 	}
 }
