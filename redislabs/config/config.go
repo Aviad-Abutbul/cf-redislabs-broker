@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/cloudfoundry-incubator/candiedyaml"
 	"os"
+
+	"github.com/cloudfoundry-incubator/candiedyaml"
 )
 
 type Config struct {
@@ -11,7 +12,9 @@ type Config struct {
 }
 
 type RedislabsConfig struct {
-	Auth AuthConfig `yaml:"auth"`
+	Auth    AuthConfig `yaml:"auth"`
+	Address string     `yaml:"address"`
+	Port    int        `yaml:"port"`
 }
 
 type ServiceBrokerConfig struct {
