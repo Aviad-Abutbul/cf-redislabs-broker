@@ -3,6 +3,7 @@ package redislabs
 import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/passwords"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
@@ -33,6 +34,10 @@ type ServiceBroker struct {
 	Config          config.Config
 	Logger          lager.Logger
 }
+
+var (
+	RedisPasswordLength = 48
+)
 
 func (b *ServiceBroker) Services() []brokerapi.Service {
 	planList := []brokerapi.ServicePlan{}
@@ -94,6 +99,12 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 		return ErrPersisterNotFound
 	}
 	settings := settingsByID[provisionDetails.PlanID]
+	password, err := passwords.Generate(RedisPasswordLength)
+	if err != nil {
+		b.Logger.Error("Failed to generate a password", err)
+		return err
+	}
+	settings.Password = password
 	return adapter.Create(instanceID, *settings, persister)
 
 	// if redisLabsServiceBroker.instanceExists(instanceID) {
