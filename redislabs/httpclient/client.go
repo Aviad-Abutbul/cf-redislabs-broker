@@ -57,7 +57,7 @@ func New(username string, password string, address string, port int, logger lage
 func (c *httpClient) Put(endpoint string, payload HTTPPayload) (*http.Response, error) {
 	response, err := c.performRequest("PUT", endpoint, HTTPParams{}, payload)
 	if err != nil {
-		c.logger.Fatal("Performing PUT request", err, lager.Data{
+		c.logger.Error("Performing PUT request", err, lager.Data{
 			"endoint": endpoint,
 			"payload": payload,
 		})
@@ -69,7 +69,7 @@ func (c *httpClient) Put(endpoint string, payload HTTPPayload) (*http.Response, 
 func (c *httpClient) Post(endpoint string, payload HTTPPayload) (*http.Response, error) {
 	response, err := c.performRequest("POST", endpoint, HTTPParams{}, payload)
 	if err != nil {
-		c.logger.Fatal("Performing POST request", err, lager.Data{
+		c.logger.Error("Performing POST request", err, lager.Data{
 			"endoint": endpoint,
 			"payload": payload,
 		})
@@ -81,7 +81,7 @@ func (c *httpClient) Post(endpoint string, payload HTTPPayload) (*http.Response,
 func (c *httpClient) Get(endpoint string, params HTTPParams) (*http.Response, error) {
 	response, err := c.performRequest("GET", endpoint, params, HTTPPayload{})
 	if err != nil {
-		c.logger.Fatal("Performing GET request", err, lager.Data{
+		c.logger.Error("Performing GET request", err, lager.Data{
 			"endoint": endpoint,
 		})
 		return nil, err
