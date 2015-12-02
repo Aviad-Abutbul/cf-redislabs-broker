@@ -8,6 +8,7 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	brokerconfig "github.com/Altoros/cf-redislabs-broker/redislabs/config"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_binders"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/testing"
@@ -20,22 +21,20 @@ import (
 
 var _ = Describe("Broker", func() {
 	var (
-		broker          redislabs.ServiceBroker
-		config          brokerconfig.Config
-		instanceCreator redislabs.ServiceInstanceCreator
-		instanceBinder  redislabs.ServiceInstanceBinder
-		persister       persisters.StatePersister
-		logger          = lager.NewLogger("test") // does not actually log anything
+		broker    brokerapi.ServiceBroker
+		config    brokerconfig.Config
+		persister persisters.StatePersister
+		logger    = lager.NewLogger("test") // does not actually log anything
 	)
 
 	JustBeforeEach(func() {
-		broker = redislabs.ServiceBroker{
-			Config:          config,
-			InstanceCreator: instanceCreator,
-			InstanceBinder:  instanceBinder,
-			StatePersister:  persister,
-			Logger:          logger,
-		}
+		broker = redislabs.NewServiceBroker(
+			instancecreators.NewDefault(config, logger),
+			instancebinders.NewDefault(config, logger),
+			persister,
+			config,
+			logger,
+		)
 	})
 
 	Describe("Looking for plans", func() {
@@ -116,36 +115,16 @@ var _ = Describe("Broker", func() {
 				})
 			})
 
-			Context("And no instance creators", func() {
-				BeforeEach(func() {
-					requestedPlanID = planID
-				})
-				It("Rejects to create an instance", func() {
-					err := broker.Provision("some-id", details)
-					Expect(err).To(HaveOccurred())
-					Expect(err).To(Equal(redislabs.ErrInstanceCreatorNotFound))
-				})
-			})
-
-			Context("And no persisters", func() {
-				BeforeEach(func() {
-					instanceCreator = instancecreators.NewDefault(config, logger)
-				})
-				It("Rejects to create an instance", func() {
-					err := broker.Provision("some-id", details)
-					Expect(err).To(HaveOccurred())
-					Expect(err).To(Equal(redislabs.ErrPersisterNotFound))
-				})
-			})
-
 			Context("And given proper settings", func() {
 				var (
 					tmpStateDir string
 					proxy       testing.HTTPProxy
+					err         error
 				)
 
 				BeforeEach(func() {
-					var err error
+					requestedPlanID = planID
+
 					tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
 					Expect(err).NotTo(HaveOccurred())
 					persister = persisters.NewLocalPersister(path.Join(tmpStateDir, "state.json"))
@@ -161,7 +140,6 @@ var _ = Describe("Broker", func() {
 						}},
 					})
 					config.Redislabs.Address = proxy.URL()
-					instanceCreator = instancecreators.NewDefault(config, logger)
 				})
 				AfterEach(func() {
 					proxy.Close()

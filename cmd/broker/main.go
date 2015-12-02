@@ -3,13 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/Altoros/cf-redislabs-broker/redislabs"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_binders"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	// "github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
-	"github.com/pivotal-cf/brokerapi"
-	"github.com/pivotal-golang/lager"
 	"net/http"
 	"os"
+
+	"github.com/pivotal-cf/brokerapi"
+	"github.com/pivotal-golang/lager"
 )
 
 var (
@@ -46,12 +51,13 @@ func main() {
 	// instanceBinder := redislabs.ServiceInstanceBinder{}
 	// persister := persisters.StatePersister{}
 
-	serviceBroker := &redislabs.ServiceBroker{
-		Logger: brokerLogger,
-		// InstanceCreator: instanceCreator,
-		// InstanceBinder:  instanceBinder,
-		// StatePersister:  persister,
-	}
+	serviceBroker := redislabs.NewServiceBroker(
+		instancecreators.NewDefault(config, brokerLogger),
+		instancebinders.NewDefault(config, brokerLogger),
+		persisters.NewLocalPersister("state.json"),
+		config,
+		brokerLogger,
+	)
 
 	credentials := brokerapi.BrokerCredentials{
 		Username: config.ServiceBroker.Auth.Username,

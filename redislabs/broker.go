@@ -27,7 +27,7 @@ type ServiceInstanceBinder interface {
 	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
 }
 
-type ServiceBroker struct {
+type serviceBroker struct {
 	InstanceCreator ServiceInstanceCreator
 	InstanceBinder  ServiceInstanceBinder
 	StatePersister  persisters.StatePersister
@@ -39,7 +39,23 @@ var (
 	RedisPasswordLength = 48
 )
 
-func (b *ServiceBroker) Services() []brokerapi.Service {
+func NewServiceBroker(
+	instanceCreator ServiceInstanceCreator,
+	instanceBinder ServiceInstanceBinder,
+	statePersister persisters.StatePersister,
+	conf config.Config,
+	logger lager.Logger) *serviceBroker {
+
+	return &serviceBroker{
+		InstanceCreator: instanceCreator,
+		InstanceBinder:  instanceBinder,
+		StatePersister:  statePersister,
+		Config:          conf,
+		Logger:          logger,
+	}
+}
+
+func (b *serviceBroker) Services() []brokerapi.Service {
 	planList := []brokerapi.ServicePlan{}
 	for _, p := range b.planDescriptions() {
 		planList = append(planList, *p)
@@ -82,7 +98,7 @@ func (b *ServiceBroker) Services() []brokerapi.Service {
 	// }
 }
 
-func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
+func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
 	if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
 		return brokerapi.ErrInstanceDoesNotExist
 	}
@@ -108,7 +124,7 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	return adapter.Create(instanceID, *settings, persister)
 }
 
-func (b *ServiceBroker) Deprovision(instanceID string) error {
+func (b *serviceBroker) Deprovision(instanceID string) error {
 	return brokerapi.ErrInstanceDoesNotExist
 	//for _, instanceCreator := range redisLabsServiceBroker.InstanceCreators {
 	//	instanceExists, _ := instanceCreator.InstanceExists(instanceID)
@@ -118,7 +134,7 @@ func (b *ServiceBroker) Deprovision(instanceID string) error {
 	//}
 }
 
-func (b *ServiceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
+func (b *serviceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
 	state, err := b.StatePersister.Load()
 	if err != nil {
 		b.Logger.Error("Failed to load the broker state", err)
@@ -142,11 +158,11 @@ func (b *ServiceBroker) Bind(instanceID, bindingID string, details brokerapi.Bin
 // credentials from the application environment. Unbind exists as a part
 // of the brokerapi.ServiceBroker interface and does not have to do
 // any specific job in this context.
-func (b *ServiceBroker) Unbind(instanceID, bindingID string) error {
+func (b *serviceBroker) Unbind(instanceID, bindingID string) error {
 	return nil
 }
 
-func (b *ServiceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
+func (b *serviceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
 	plansByID := map[string]*brokerapi.ServicePlan{}
 	for _, plan := range b.Config.ServiceBroker.Plans {
 		plansByID[plan.ID] = &brokerapi.ServicePlan{
@@ -158,7 +174,7 @@ func (b *ServiceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
 	return plansByID
 }
 
-func (b *ServiceBroker) instanceSettings() map[string]*cluster.InstanceSettings {
+func (b *serviceBroker) instanceSettings() map[string]*cluster.InstanceSettings {
 	settingsByID := map[string]*cluster.InstanceSettings{}
 	for _, plan := range b.Config.ServiceBroker.Plans {
 		config := plan.ServiceInstanceConfig
