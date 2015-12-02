@@ -109,14 +109,13 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 }
 
 func (b *ServiceBroker) Deprovision(instanceID string) error {
-	return nil
+	return brokerapi.ErrInstanceDoesNotExist
 	//for _, instanceCreator := range redisLabsServiceBroker.InstanceCreators {
 	//	instanceExists, _ := instanceCreator.InstanceExists(instanceID)
 	//	if instanceExists {
 	//		return instanceCreator.Destroy(instanceID)
 	//	}
 	//}
-	//return brokerapi.ErrInstanceDoesNotExist
 }
 
 func (b *ServiceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
