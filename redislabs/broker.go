@@ -100,7 +100,7 @@ func (b *serviceBroker) Services() []brokerapi.Service {
 
 func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
 	if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
-		return brokerapi.ErrInstanceDoesNotExist
+		return ErrServiceDoesNotExist
 	}
 	settingsByID := b.instanceSettings()
 	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
