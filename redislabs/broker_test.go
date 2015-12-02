@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/Altoros/cf-redislabs-broker/redislabs"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	brokerconfig "github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
@@ -175,6 +176,22 @@ var _ = Describe("Broker", func() {
 					broker.Provision("some-id", details)
 					err := broker.Provision("some-id", details)
 					Expect(err).To(HaveOccurred())
+				})
+				It("Saves the credentials properly", func() {
+					err := broker.Provision("some-id", details)
+					Expect(err).ToNot(HaveOccurred())
+
+					state, err := persister.Load()
+					Expect(err).ToNot(HaveOccurred())
+					Expect(len(state.AvailableInstances)).To(Equal(1))
+					s := state.AvailableInstances[0]
+					Expect(s.ID).To(Equal("some-id"))
+					Expect(s.Credentials).To(Equal(cluster.InstanceCredentials{
+						UID:      1,
+						Port:     11909,
+						IPList:   []string{"10.0.2.4"},
+						Password: "pass",
+					}))
 				})
 			})
 		})
