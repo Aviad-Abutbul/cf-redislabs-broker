@@ -5,18 +5,27 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 )
 
-type Default struct {
+type default struct {
+	conf config.Config
+	logger lager.Logger
 }
 
-func (d *Default) Unbind(instanceID string, bindingID string, persister persisters.StatePersister) error {
+func NewDefault(conf config.Config, logger lager.Logger) *default {
+	return &default{
+		conf: conf,
+		logger: logger,
+	}
+}
+
+func (d *default) Unbind(instanceID string, bindingID string, persister persisters.StatePersister) error {
 	return nil
 }
 
-func (d *Default) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
+func (d *default) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
 	return false, nil
 }
 
-func (d *Default) Bind(instanceID string, bindingID string, persister persisters.StatePersister) (redislabs.ServiceInstanceCredentials, error) {
+func (d *default) Bind(instanceID string, bindingID string, persister persisters.StatePersister) (redislabs.ServiceInstanceCredentials, error) {
 	// load data from persister
 	// WIP
 	creds := redislabs.ServiceInstanceCredentials{
