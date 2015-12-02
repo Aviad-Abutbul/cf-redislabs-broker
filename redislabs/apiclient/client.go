@@ -12,7 +12,7 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/httpclient"
-	"github.com/Altoros/cf-redislabs-broker/vendor/github.com/pivotal-golang/lager"
+	"github.com/pivotal-golang/lager"
 )
 
 type (
