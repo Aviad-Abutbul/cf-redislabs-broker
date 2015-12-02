@@ -72,9 +72,7 @@ func (c *apiClient) CreateDatabase(settings cluster.InstanceSettings) (chan clus
 		return nil, err
 	}
 
-	c.logger.Info("Database creation has been scheduled", lager.Data{
-		"response": res,
-	})
+	c.logger.Info("Database creation has been scheduled")
 	ch := make(chan cluster.InstanceCredentials)
 	go func() {
 		var payload statusResponse
@@ -126,9 +124,7 @@ func (c *apiClient) parseErrorResponse(res *http.Response) (errorResponse, error
 		err = json.Unmarshal(bytes, &payload)
 	}
 	if err != nil {
-		c.logger.Error("Failed to parse the error response payload", err, lager.Data{
-			"response": res,
-		})
+		c.logger.Error("Failed to parse the error response payload", err)
 	}
 	return payload, err
 }
@@ -141,9 +137,7 @@ func (c *apiClient) parseStatusResponse(res *http.Response) (statusResponse, err
 		err = json.Unmarshal(bytes, &payload)
 	}
 	if err != nil {
-		c.logger.Error("Failed to parse the status response payload", err, lager.Data{
-			"response": res,
-		})
+		c.logger.Error("Failed to parse the status response payload", err)
 	}
 	return payload, err
 }
