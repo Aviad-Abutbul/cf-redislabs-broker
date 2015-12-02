@@ -218,7 +218,6 @@ var _ = Describe("Broker", func() {
 		Context("When there is a provisioned instance", func() {
 			var (
 				tmpStateDir string
-				persister   persisters.StatePersister
 				state       *persisters.State
 				err         error
 			)
