@@ -270,5 +270,38 @@ var _ = Describe("Broker", func() {
 				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
 			})
 		})
+		Context("When a provisioned instance exists", func() {
+			var (
+				tmpStateDir string
+				state       *persisters.State
+			)
+			BeforeEach(func() {
+				tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
+				if err != nil {
+					panic(err)
+				}
+				persister = persisters.NewLocalPersister(path.Join(tmpStateDir, "state.json"))
+				state = &persisters.State{
+					AvailableInstances: []persisters.ServiceInstance{
+						{
+							ID:          "test-instance",
+							Credentials: cluster.InstanceCredentials{},
+						},
+					},
+				}
+				if err = persister.Save(state); err != nil {
+					panic(err)
+				}
+			})
+			AfterEach(func() {
+				os.RemoveAll(tmpStateDir)
+			})
+			It("Can delete it successfully", func() {
+				err = broker.Deprovision("test-instance")
+				Expect(err).NotTo(HaveOccurred())
+				err = broker.Deprovision("test-instance")
+				Expect(err).To(HaveOccurred())
+			})
+		})
 	})
 })
