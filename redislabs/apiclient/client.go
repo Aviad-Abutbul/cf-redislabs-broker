@@ -27,7 +27,7 @@ type (
 	}
 
 	statusResponse struct {
-		UID        string   `json:"uid"`
+		UID        int      `json:"uid"`
 		Password   string   `json:"authentication_admin_pass"`
 		IPList     []string `json:"endpoint_ip"`
 		DNSAddress string   `json:"dns_address_master"`
