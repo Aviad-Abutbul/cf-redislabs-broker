@@ -106,33 +106,6 @@ func (b *ServiceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	}
 	settings.Password = password
 	return adapter.Create(instanceID, *settings, persister)
-
-	// if redisLabsServiceBroker.instanceExists(instanceID) {
-	// 	return brokerapi.ErrInstanceAlreadyExists
-	// }
-
-	// if serviceDetails.PlanID == "" {
-	// 	return errors.New("plan_id required")
-	// }
-
-	// planIdentifier := ""
-	// for key, plan := range redisLabsServiceBroker.plans() {
-	// 	if plan.ID == serviceDetails.PlanID {
-	// 		planIdentifier = key
-	// 		break
-	// 	}
-	// }
-
-	// if planIdentifier == "" {
-	// 	return errors.New("plan_id not recognized")
-	// }
-
-	// instanceCreator, ok := redisLabsServiceBroker.InstanceCreators[planIdentifier]
-	// if !ok {
-	// 	return errors.New("instance creator not found for plan")
-	// }
-
-	// return instanceCreator.Create(instanceID)
 }
 
 func (b *ServiceBroker) Deprovision(instanceID string) error {
@@ -163,21 +136,6 @@ func (b *ServiceBroker) Bind(instanceID, bindingID string, details brokerapi.Bin
 		}
 	}
 	return nil, brokerapi.ErrInstanceDoesNotExist
-	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
-	// 	instanceExists, _ := repo.InstanceExists(instanceID)
-	// 	if instanceExists {
-	// 		instanceCredentials, err := repo.Bind(instanceID, bindingID)
-	// 		if err != nil {
-	// 			return nil, err
-	// 		}
-	// 		credentialsMap := map[string]interface{}{
-	// 			"host":     instanceCredentials.Host,
-	// 			"port":     instanceCredentials.Port,
-	// 			"password": instanceCredentials.Password,
-	// 		}
-	// 		return credentialsMap, nil
-	// 	}
-	// }
 }
 
 func (b *ServiceBroker) Unbind(instanceID, bindingID string) error {
