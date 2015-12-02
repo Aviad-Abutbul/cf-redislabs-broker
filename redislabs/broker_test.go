@@ -9,6 +9,7 @@ import (
 	brokerconfig "github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/testing"
 	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 
@@ -78,6 +79,9 @@ var _ = Describe("Broker", func() {
 							},
 						},
 					},
+					Redislabs: brokerconfig.RedislabsConfig{
+						Address: "",
+					},
 				}
 			})
 			JustBeforeEach(func() {
@@ -136,6 +140,7 @@ var _ = Describe("Broker", func() {
 			Context("And given proper settings", func() {
 				var (
 					tmpStateDir string
+					proxy       testing.HTTPProxy
 				)
 
 				BeforeEach(func() {
@@ -143,9 +148,22 @@ var _ = Describe("Broker", func() {
 					tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
 					Expect(err).NotTo(HaveOccurred())
 					persister = persisters.NewLocalPersister(path.Join(tmpStateDir, "state.json"))
-				})
 
+					proxy = testing.NewHTTPProxy()
+					proxy.RegisterEndpoints([]testing.Endpoint{
+						{"/", map[string]interface{}{
+							"uid": 1,
+							"authentication_admin_pass": "pass",
+							"endpoint_ip":               []string{"10.0.2.4"},
+							"dns_address_master":        "domain.com:11909",
+							"status":                    "active",
+						}},
+					})
+					config.Redislabs.Address = proxy.URL()
+					instanceCreator = instancecreators.NewDefault(config, logger)
+				})
 				AfterEach(func() {
+					proxy.Close()
 					os.RemoveAll(tmpStateDir)
 				})
 
