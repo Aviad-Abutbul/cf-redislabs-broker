@@ -113,7 +113,6 @@ var _ = Describe("Broker", func() {
 
 			Context("And no instance creators", func() {
 				BeforeEach(func() {
-					requestedServiceID = serviceID
 					requestedPlanID = planID
 				})
 				It("Rejects to create an instance", func() {
@@ -125,8 +124,6 @@ var _ = Describe("Broker", func() {
 
 			Context("And no persisters", func() {
 				BeforeEach(func() {
-					requestedServiceID = serviceID
-					requestedPlanID = planID
 					instanceCreator = instancecreators.NewDefault(config, logger)
 				})
 				It("Rejects to create an instance", func() {
@@ -142,8 +139,6 @@ var _ = Describe("Broker", func() {
 				)
 
 				BeforeEach(func() {
-					requestedServiceID = serviceID
-					requestedPlanID = planID
 					var err error
 					tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
 					Expect(err).NotTo(HaveOccurred())
