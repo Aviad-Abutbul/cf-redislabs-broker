@@ -138,20 +138,13 @@ func (b *ServiceBroker) Bind(instanceID, bindingID string, details brokerapi.Bin
 	return nil, brokerapi.ErrInstanceDoesNotExist
 }
 
+// Redis Labs cluster does not support multitenancy within a single
+// database. Therefore, the only goal of unbinding is to remove
+// credentials from the application environment. Unbind exists as a part
+// of the brokerapi.ServiceBroker interface and does not have to do
+// any specific job in this context.
 func (b *ServiceBroker) Unbind(instanceID, bindingID string) error {
 	return nil
-	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
-	// 	instanceExists, _ := repo.InstanceExists(instanceID)
-	// 	if instanceExists {
-	// 		err := repo.Unbind(instanceID, bindingID)
-	// 		if err != nil {
-	// 			return brokerapi.ErrBindingDoesNotExist
-	// 		}
-	// 		return nil
-	// 	}
-	// }
-
-	// return brokerapi.ErrInstanceDoesNotExist
 }
 
 func (b *ServiceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
