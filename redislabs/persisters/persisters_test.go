@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 
 	. "github.com/onsi/ginkgo"
@@ -20,10 +21,13 @@ var _ = Describe("Persisters", func() {
 		state = persisters.State{
 			AvailableInstances: []persisters.ServiceInstance{
 				{
-					ID:       "test-id",
-					Port:     11909,
-					IPList:   []string{"10.0.0.1", "10.0.0.2"},
-					Password: "passw0rd",
+					ID: "test-id",
+					Credentials: cluster.InstanceCredentials{
+						UID:      1,
+						Port:     11909,
+						IPList:   []string{"10.0.0.1", "10.0.0.2"},
+						Password: "passw0rd",
+					},
 				},
 			},
 		}
