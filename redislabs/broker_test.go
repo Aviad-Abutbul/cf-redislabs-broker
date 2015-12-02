@@ -258,4 +258,17 @@ var _ = Describe("Broker", func() {
 			})
 		})
 	})
+
+	Describe("Deprovisioning instances", func() {
+		var (
+			err error
+		)
+		Context("When there are no provisioned instances", func() {
+			It("Deprovisioning results in a failure", func() {
+				err = broker.Deprovision("instance-id")
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
+			})
+		})
+	})
 })
