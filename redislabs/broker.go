@@ -15,14 +15,8 @@ type ServiceInstanceCreator interface {
 	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
 }
 
-type ServiceInstanceCredentials struct {
-	Host     string
-	Port     int64
-	Password string
-}
-
 type ServiceInstanceBinder interface {
-	Bind(instanceID string, bindingID string, persister persisters.StatePersister) (ServiceInstanceCredentials, error)
+	Bind(instanceID string, bindingID string, persister persisters.StatePersister) (interface{}, error)
 	Unbind(instanceID string, bindingID string, persister persisters.StatePersister) error
 	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
 }
@@ -127,22 +121,7 @@ func (b *serviceBroker) Deprovision(instanceID string) error {
 }
 
 func (b *serviceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
-	state, err := b.StatePersister.Load()
-	if err != nil {
-		b.Logger.Error("Failed to load the broker state", err)
-		return nil, err
-	}
-	for _, instance := range state.AvailableInstances {
-		if instance.ID == instanceID {
-			creds := instance.Credentials
-			return map[string]interface{}{
-				"port":     creds.Port,
-				"ip_list":  creds.IPList,
-				"password": creds.Password,
-			}, nil
-		}
-	}
-	return nil, brokerapi.ErrInstanceDoesNotExist
+	return b.InstanceBinder.Bind(instanceID, bindingID, b.StatePersister)
 }
 
 // Redis Labs cluster does not support multitenancy within a single

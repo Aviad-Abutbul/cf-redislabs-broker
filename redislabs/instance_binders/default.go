@@ -1,9 +1,9 @@
 package instancebinders
 
 import (
-	"github.com/Altoros/cf-redislabs-broker/redislabs"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 )
 
@@ -27,13 +27,21 @@ func (d *defaultBinder) InstanceExists(instanceID string, persister persisters.S
 	return false, nil
 }
 
-func (d *defaultBinder) Bind(instanceID string, bindingID string, persister persisters.StatePersister) (redislabs.ServiceInstanceCredentials, error) {
-	// load data from persister
-	// WIP
-	creds := redislabs.ServiceInstanceCredentials{
-		Host:     "somo-address",
-		Port:     8080,
-		Password: "password",
+func (d *defaultBinder) Bind(instanceID string, bindingID string, persister persisters.StatePersister) (interface{}, error) {
+	state, err := persister.Load()
+	if err != nil {
+		d.logger.Error("Failed to load the broker state", err)
+		return nil, err
 	}
-	return creds, nil
+	for _, instance := range state.AvailableInstances {
+		if instance.ID == instanceID {
+			creds := instance.Credentials
+			return map[string]interface{}{
+				"port":     creds.Port,
+				"ip_list":  creds.IPList,
+				"password": creds.Password,
+			}, nil
+		}
+	}
+	return nil, brokerapi.ErrInstanceDoesNotExist
 }
