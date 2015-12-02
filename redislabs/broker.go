@@ -113,7 +113,7 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 		return err
 	}
 	settings.Password = password
-	return adapter.Create(instanceID, *settings, persister)
+	return b.InstanceCreator.Create(instanceID, *settings, b.StatePersister)
 }
 
 func (b *serviceBroker) Deprovision(instanceID string) error {
