@@ -215,5 +215,48 @@ var _ = Describe("Broker", func() {
 				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
 			})
 		})
+		Context("When there is a provisioned instance", func() {
+			var (
+				tmpStateDir string
+				persister   persisters.StatePersister
+				state       *persisters.State
+				err         error
+			)
+			BeforeEach(func() {
+				tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
+				if err != nil {
+					panic(err)
+				}
+				persister = persisters.NewLocalPersister(path.Join(tmpStateDir, "state.json"))
+				state = &persisters.State{
+					AvailableInstances: []persisters.ServiceInstance{
+						{
+							ID: "test-instance",
+							Credentials: cluster.InstanceCredentials{
+								UID:      1,
+								Port:     11909,
+								IPList:   []string{"10.0.2.5"},
+								Password: "pass",
+							},
+						},
+					},
+				}
+				if err = persister.Save(state); err != nil {
+					panic(err)
+				}
+			})
+			AfterEach(func() {
+				os.RemoveAll(tmpStateDir)
+			})
+			It("Successfully retrieves the credentials", func() {
+				credentials, err := broker.Bind("test-instance", "test-binding", details)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(credentials).To(Equal(map[string]interface{}{
+					"port":     11909,
+					"ip_list":  []string{"10.0.2.5"},
+					"password": "pass",
+				}))
+			})
+		})
 	})
 })
