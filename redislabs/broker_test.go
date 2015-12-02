@@ -197,4 +197,23 @@ var _ = Describe("Broker", func() {
 		})
 	})
 
+	Describe("Binding provisioned instances", func() {
+		var (
+			details brokerapi.BindDetails
+		)
+		BeforeEach(func() {
+			details = brokerapi.BindDetails{
+				AppGUID:   "",
+				ServiceID: "test-service",
+				PlanID:    "test-plan",
+			}
+		})
+		Context("When there are no provisioned instances", func() {
+			It("Rejects to bind anything", func() {
+				_, err := broker.Bind("instance-id", "binding-id", details)
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
+			})
+		})
+	})
 })
