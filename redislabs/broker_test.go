@@ -154,7 +154,7 @@ var _ = Describe("Broker", func() {
 					proxy.RegisterEndpoints([]testing.Endpoint{
 						{"/", map[string]interface{}{
 							"uid": 1,
-							"authentication_admin_pass": "pass",
+							"authentication_redis_pass": "pass",
 							"endpoint_ip":               []string{"10.0.2.4"},
 							"dns_address_master":        "domain.com:11909",
 							"status":                    "active",
