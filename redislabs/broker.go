@@ -147,6 +147,21 @@ func (b *ServiceBroker) Deprovision(instanceID string) error {
 }
 
 func (b *ServiceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
+	state, err := b.StatePersister.Load()
+	if err != nil {
+		b.Logger.Error("Failed to load the broker state", err)
+		return nil, err
+	}
+	for _, instance := range state.AvailableInstances {
+		if instance.ID == instanceID {
+			creds := instance.Credentials
+			return map[string]interface{}{
+				"port":     creds.Port,
+				"ip_list":  creds.IPList,
+				"password": creds.Password,
+			}, nil
+		}
+	}
 	return nil, brokerapi.ErrInstanceDoesNotExist
 	// for _, repo := range redisLabsServiceBroker.InstanceBinders {
 	// 	instanceExists, _ := repo.InstanceExists(instanceID)
