@@ -7,27 +7,27 @@ import (
 	"github.com/pivotal-golang/lager"
 )
 
-type default struct {
-	conf config.Config
+type defaultBinder struct {
+	conf   config.Config
 	logger lager.Logger
 }
 
-func NewDefault(conf config.Config, logger lager.Logger) *default {
-	return &default{
-		conf: conf,
+func NewDefault(conf config.Config, logger lager.Logger) *defaultBinder {
+	return &defaultBinder{
+		conf:   conf,
 		logger: logger,
 	}
 }
 
-func (d *default) Unbind(instanceID string, bindingID string, persister persisters.StatePersister) error {
+func (d *defaultBinder) Unbind(instanceID string, bindingID string, persister persisters.StatePersister) error {
 	return nil
 }
 
-func (d *default) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
+func (d *defaultBinder) InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error) {
 	return false, nil
 }
 
-func (d *default) Bind(instanceID string, bindingID string, persister persisters.StatePersister) (redislabs.ServiceInstanceCredentials, error) {
+func (d *defaultBinder) Bind(instanceID string, bindingID string, persister persisters.StatePersister) (redislabs.ServiceInstanceCredentials, error) {
 	// load data from persister
 	// WIP
 	creds := redislabs.ServiceInstanceCredentials{
