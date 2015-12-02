@@ -3,7 +3,9 @@ package instancecreators
 import (
 	"fmt"
 	"sync"
+	"time"
 
+	"github.com/Altoros/cf-redislabs-broker/redislabs/apiclient"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
@@ -83,20 +85,19 @@ func (d *defaultCreator) InstanceExists(instanceID string, persister persisters.
 }
 
 func (d *defaultCreator) createDatabase(settings cluster.InstanceSettings) (cluster.InstanceCredentials, error) {
-	return cluster.InstanceCredentials{}, nil
-	// api := apiclient.New(d.conf, d.logger)
-	// ch, err := api.CreateDatabase(settings)
-	// if err != nil {
-	// 	return cluster.InstanceCredentials{}, ErrFailedToCreateDatabase
-	// }
-	//
-	// for {
-	// 	select {
-	// 	case credentials := <-ch:
-	// 		return credentials, nil
-	// 	case <-time.After(time.Second * time.Duration(WaitingForDatabaseTimeout)):
-	// 		d.logger.Error("Waiting for a database timeout is expired", ErrCreateDatabaseTimeoutExpired)
-	// 		return cluster.InstanceCredentials{}, ErrCreateDatabaseTimeoutExpired
-	// 	}
-	// }
+	api := apiclient.New(d.conf, d.logger)
+	ch, err := api.CreateDatabase(settings)
+	if err != nil {
+		return cluster.InstanceCredentials{}, err //ErrFailedToCreateDatabase
+	}
+
+	for {
+		select {
+		case credentials := <-ch:
+			return credentials, nil
+		case <-time.After(time.Second * time.Duration(WaitingForDatabaseTimeout)):
+			d.logger.Error("Waiting for a database timeout is expired", ErrCreateDatabaseTimeoutExpired)
+			return cluster.InstanceCredentials{}, ErrCreateDatabaseTimeoutExpired
+		}
+	}
 }
