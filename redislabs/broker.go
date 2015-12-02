@@ -106,14 +106,6 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
 		return ErrPlanDoesNotExist
 	}
-	adapter := b.InstanceCreator
-	if adapter == nil {
-		return ErrInstanceCreatorNotFound
-	}
-	persister := b.StatePersister
-	if persister == nil {
-		return ErrPersisterNotFound
-	}
 	settings := settingsByID[provisionDetails.PlanID]
 	password, err := passwords.Generate(RedisPasswordLength)
 	if err != nil {
