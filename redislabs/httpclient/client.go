@@ -17,6 +17,7 @@ type (
 		Get(endpoint string, params HTTPParams) (*http.Response, error)
 		Post(endpoint string, payload HTTPPayload) (*http.Response, error)
 		Put(endpoint string, payload HTTPPayload) (*http.Response, error)
+		Delete(endpoint string) (*http.Response, error)
 	}
 
 	httpClient struct {
@@ -83,6 +84,17 @@ func (c *httpClient) Get(endpoint string, params HTTPParams) (*http.Response, er
 	if err != nil {
 		c.logger.Error("Performing GET request", err, lager.Data{
 			"endoint": endpoint,
+		})
+		return nil, err
+	}
+	return response, nil
+}
+
+func (c *httpClient) Delete(endpoint string) (*http.Response, error) {
+	response, err := c.performRequest("DELETE", endpoint, HTTPParams{}, HTTPPayload{})
+	if err != nil {
+		c.logger.Error("Failed to perform DELETE request", err, lager.Data{
+			"endpoint": endpoint,
 		})
 		return nil, err
 	}
