@@ -106,6 +106,33 @@ func (c *apiClient) CreateDatabase(settings cluster.InstanceSettings) (chan clus
 	return ch, nil
 }
 
+func (c *apiClient) DeleteDatabase(UID int) error {
+	httpClient := c.httpClient()
+
+	res, err := httpClient.Delete(fmt.Sprintf("/v1/bdbs/%d", UID))
+	if err != nil {
+		c.logger.Error("Failed to perform the database removal request", err, lager.Data{
+			"UID": UID,
+		})
+		return err
+	}
+
+	if res.StatusCode != 200 {
+		payload, err := c.parseErrorResponse(res)
+		if err != nil {
+			return err
+		}
+		err = fmt.Errorf(payload.ErrorMessage)
+		c.logger.Error("Failed to delete the database", err)
+		return err
+	}
+
+	c.logger.Info("The database removal has been scheduled", lager.Data{
+		"UID": UID,
+	})
+	return nil
+}
+
 func (c *apiClient) httpClient() httpclient.HTTPClient {
 	return httpclient.New(
 		c.conf.Redislabs.Auth.Username,
