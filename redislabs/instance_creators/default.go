@@ -9,6 +9,7 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 )
 
@@ -77,6 +78,37 @@ func (d *defaultCreator) Create(instanceID string, settings cluster.InstanceSett
 }
 
 func (d *defaultCreator) Destroy(instanceID string, persister persisters.StatePersister) error {
+	state, err := persister.Load()
+	if err != nil {
+		d.logger.Error("Failed to load the broker state", err)
+		return err
+	}
+
+	instancesLeft := []persisters.ServiceInstance{}
+	removed := false
+	for _, instance := range state.AvailableInstances {
+		if instance.ID == instanceID {
+			if err := d.deleteDatabase(instance.Credentials.UID); err != nil {
+				return err
+			}
+			removed = true
+		} else {
+			instancesLeft = append(instancesLeft, instance)
+		}
+	}
+
+	if !removed {
+		return brokerapi.ErrInstanceDoesNotExist
+	}
+
+	// Save the new broker state.
+	state.AvailableInstances = instancesLeft
+	if err = persister.Save(state); err != nil {
+		d.logger.Error("Failed to save the new broker state after the instance removal", err, lager.Data{
+			"instance-id": instanceID,
+		})
+		return err
+	}
 	return nil
 }
 
@@ -100,4 +132,9 @@ func (d *defaultCreator) createDatabase(settings cluster.InstanceSettings) (clus
 			return cluster.InstanceCredentials{}, ErrCreateDatabaseTimeoutExpired
 		}
 	}
+}
+
+func (d *defaultCreator) deleteDatabase(UID int) error {
+	api := apiclient.New(d.conf, d.logger)
+	return api.DeleteDatabase(UID)
 }
