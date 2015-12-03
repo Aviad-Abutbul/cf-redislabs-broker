@@ -97,7 +97,7 @@ func (c *apiClient) CreateDatabase(settings cluster.InstanceSettings) (chan clus
 				break
 			}
 
-			res, err = httpClient.Get(fmt.Sprintf("/v1/bdbs/%s", payload.UID), httpclient.HTTPParams{})
+			res, err = httpClient.Get(fmt.Sprintf("/v1/bdbs/%d", payload.UID), httpclient.HTTPParams{})
 			if err != nil {
 				c.logger.Error("Failed to make a polling request", err)
 			}
