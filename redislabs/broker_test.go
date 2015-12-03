@@ -252,6 +252,7 @@ var _ = Describe("Broker", func() {
 			var (
 				tmpStateDir string
 				state       *persisters.State
+				proxy       testing.HTTPProxy
 			)
 			BeforeEach(func() {
 				tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
@@ -270,8 +271,13 @@ var _ = Describe("Broker", func() {
 				if err = persister.Save(state); err != nil {
 					panic(err)
 				}
+
+				proxy = testing.NewHTTPProxy()
+				proxy.RegisterEndpoints([]testing.Endpoint{{"/", ""}})
+				config.Redislabs.Address = proxy.URL()
 			})
 			AfterEach(func() {
+				proxy.Close()
 				os.RemoveAll(tmpStateDir)
 			})
 			It("Can delete it successfully", func() {
