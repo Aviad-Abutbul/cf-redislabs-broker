@@ -14,11 +14,23 @@ type FakeServiceBroker struct {
 
 	InstanceLimit int
 
-	ProvisionError   error
-	BindError        error
-	DeprovisionError error
+	ProvisionError     error
+	BindError          error
+	DeprovisionError   error
+	LastOperationError error
 
-	BrokerCalled bool
+	BrokerCalled             bool
+	LastOperationState       brokerapi.LastOperationState
+	LastOperationDescription string
+}
+
+type FakeAsyncServiceBroker struct {
+	FakeServiceBroker
+	ShouldProvisionAsync bool
+}
+
+type FakeAsyncOnlyServiceBroker struct {
+	FakeServiceBroker
 }
 
 func (fakeBroker *FakeServiceBroker) Services() []brokerapi.Service {
@@ -62,24 +74,68 @@ func (fakeBroker *FakeServiceBroker) Services() []brokerapi.Service {
 	}
 }
 
-func (fakeBroker *FakeServiceBroker) Provision(instanceID string, details brokerapi.ProvisionDetails) error {
+func (fakeBroker *FakeServiceBroker) Provision(instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
 	fakeBroker.BrokerCalled = true
 
 	if fakeBroker.ProvisionError != nil {
-		return fakeBroker.ProvisionError
+		return false, fakeBroker.ProvisionError
 	}
 
 	if len(fakeBroker.ProvisionedInstanceIDs) >= fakeBroker.InstanceLimit {
-		return brokerapi.ErrInstanceLimitMet
+		return false, brokerapi.ErrInstanceLimitMet
 	}
 
 	if sliceContains(instanceID, fakeBroker.ProvisionedInstanceIDs) {
-		return brokerapi.ErrInstanceAlreadyExists
+		return false, brokerapi.ErrInstanceAlreadyExists
 	}
 
 	fakeBroker.ProvisionDetails = details
 	fakeBroker.ProvisionedInstanceIDs = append(fakeBroker.ProvisionedInstanceIDs, instanceID)
-	return nil
+	return false, nil
+}
+
+func (fakeBroker *FakeAsyncServiceBroker) Provision(instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
+	fakeBroker.BrokerCalled = true
+
+	if fakeBroker.ProvisionError != nil {
+		return false, fakeBroker.ProvisionError
+	}
+
+	if len(fakeBroker.ProvisionedInstanceIDs) >= fakeBroker.InstanceLimit {
+		return false, brokerapi.ErrInstanceLimitMet
+	}
+
+	if sliceContains(instanceID, fakeBroker.ProvisionedInstanceIDs) {
+		return false, brokerapi.ErrInstanceAlreadyExists
+	}
+
+	fakeBroker.ProvisionDetails = details
+	fakeBroker.ProvisionedInstanceIDs = append(fakeBroker.ProvisionedInstanceIDs, instanceID)
+	return brokerapi.IsAsync(fakeBroker.ShouldProvisionAsync), nil
+}
+
+func (fakeBroker *FakeAsyncOnlyServiceBroker) Provision(instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
+	fakeBroker.BrokerCalled = true
+
+	if fakeBroker.ProvisionError != nil {
+		return false, fakeBroker.ProvisionError
+	}
+
+	if len(fakeBroker.ProvisionedInstanceIDs) >= fakeBroker.InstanceLimit {
+		return false, brokerapi.ErrInstanceLimitMet
+	}
+
+	if sliceContains(instanceID, fakeBroker.ProvisionedInstanceIDs) {
+		return false, brokerapi.ErrInstanceAlreadyExists
+	}
+
+	if !asyncAllowed {
+		return true, brokerapi.ErrAsyncRequired
+	}
+
+	fakeBroker.ProvisionDetails = details
+	fakeBroker.ProvisionedInstanceIDs = append(fakeBroker.ProvisionedInstanceIDs, instanceID)
+	return true, nil
 }
 
 func (fakeBroker *FakeServiceBroker) Deprovision(instanceID string) error {
@@ -128,6 +184,15 @@ func (fakeBroker *FakeServiceBroker) Unbind(instanceID, bindingID string) error 
 	}
 
 	return brokerapi.ErrInstanceDoesNotExist
+}
+
+func (fakeBroker *FakeServiceBroker) LastOperation(instanceID string) (brokerapi.LastOperation, error) {
+
+	if fakeBroker.LastOperationError != nil {
+		return brokerapi.LastOperation{}, fakeBroker.LastOperationError
+	}
+
+	return brokerapi.LastOperation{State: fakeBroker.LastOperationState, Description: fakeBroker.LastOperationDescription}, nil
 }
 
 type FakeCredentials struct {
