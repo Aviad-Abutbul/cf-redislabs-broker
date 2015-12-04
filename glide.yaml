@@ -1,4 +1,0 @@
-package: main
-import:
-- package: github.com/pivotal-cf/brokerapi
-- package: github.com/cloudfoundry-incubator/candiedyaml

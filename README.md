@@ -47,12 +47,7 @@ go test ./redislabs/...
 
 ### Adding a dependency
 
-* Install [glide](https://github.com/Masterminds/glide.git)
-* `glide get github.com/<ORG>/<REPO>`
-* `find vendor -name '.git' | xargs rm -r`
-* `git add vendor glide.yaml` & commit
-
-Note: use `glide` with at least `0.7.2` version.
+TODO
 
 ### Starting the service
 
