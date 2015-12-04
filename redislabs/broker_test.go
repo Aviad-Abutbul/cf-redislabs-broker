@@ -97,7 +97,7 @@ var _ = Describe("Broker", func() {
 					requestedServiceID = "unknown"
 				})
 				It("Rejects to create an instance", func() {
-					err := broker.Provision("some-id", details)
+					_, err := broker.Provision("some-id", details, false)
 					Expect(err).To(HaveOccurred())
 					Expect(err).To(Equal(redislabs.ErrServiceDoesNotExist))
 				})
@@ -109,7 +109,7 @@ var _ = Describe("Broker", func() {
 					requestedPlanID = "unknown"
 				})
 				It("Rejects to create an instance", func() {
-					err := broker.Provision("some-id", details)
+					_, err := broker.Provision("some-id", details, false)
 					Expect(err).To(HaveOccurred())
 					Expect(err).To(Equal(redislabs.ErrPlanDoesNotExist))
 				})
@@ -147,16 +147,16 @@ var _ = Describe("Broker", func() {
 				})
 
 				It("Creates an instance of the configured default plan", func() {
-					err := broker.Provision("some-id", details)
+					_, err := broker.Provision("some-id", details, false)
 					Expect(err).ToNot(HaveOccurred())
 				})
 				It("Rejects to provision the same instance again", func() {
-					broker.Provision("some-id", details)
-					err := broker.Provision("some-id", details)
+					broker.Provision("some-id", details, false)
+					_, err := broker.Provision("some-id", details, false)
 					Expect(err).To(HaveOccurred())
 				})
 				It("Saves the credentials properly", func() {
-					err := broker.Provision("some-id", details)
+					_, err := broker.Provision("some-id", details, false)
 					Expect(err).ToNot(HaveOccurred())
 
 					state, err := persister.Load()

@@ -92,22 +92,22 @@ func (b *serviceBroker) Services() []brokerapi.Service {
 	// }
 }
 
-func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails) error {
+func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
 	if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
-		return ErrServiceDoesNotExist
+		return false, ErrServiceDoesNotExist
 	}
 	settingsByID := b.instanceSettings()
 	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
-		return ErrPlanDoesNotExist
+		return false, ErrPlanDoesNotExist
 	}
 	settings := settingsByID[provisionDetails.PlanID]
 	password, err := passwords.Generate(RedisPasswordLength)
 	if err != nil {
 		b.Logger.Error("Failed to generate a password", err)
-		return err
+		return false, err
 	}
 	settings.Password = password
-	return b.InstanceCreator.Create(instanceID, *settings, b.StatePersister)
+	return false, b.InstanceCreator.Create(instanceID, *settings, b.StatePersister)
 }
 
 func (b *serviceBroker) Deprovision(instanceID string) error {
@@ -125,6 +125,10 @@ func (b *serviceBroker) Bind(instanceID, bindingID string, details brokerapi.Bin
 // any specific job in this context.
 func (b *serviceBroker) Unbind(instanceID, bindingID string) error {
 	return nil
+}
+
+func (b *serviceBroker) LastOperation(instanceID string) (brokerapi.LastOperation, error) {
+	return brokerapi.LastOperation{}, nil
 }
 
 func (b *serviceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
