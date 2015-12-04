@@ -10,6 +10,7 @@ type (
 	HTTPProxy interface {
 		URL() string
 		RegisterEndpoints(endpoints []Endpoint)
+		RegisterEndpointHandler(endpoint string, handler func(r *http.Request) interface{})
 		Close()
 	}
 	Endpoint struct {
@@ -51,6 +52,19 @@ func (p *httpProxy) RegisterEndpoints(endpoints []Endpoint) {
 			w.Write(js)
 		})
 	}
+}
+
+func (p *httpProxy) RegisterEndpointHandler(endpoint string, handler func(r *http.Request) interface{}) {
+	p.Mux.HandleFunc(endpoint, func(w http.ResponseWriter, r *http.Request) {
+		res := handler(r)
+
+		js, err := json.Marshal(res)
+		if err != nil {
+			panic(err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	})
 }
 
 func (p *httpProxy) Close() {
