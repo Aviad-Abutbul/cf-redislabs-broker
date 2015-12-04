@@ -110,6 +110,10 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	return false, b.InstanceCreator.Create(instanceID, *settings, b.StatePersister)
 }
 
+func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.UpdateDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
+	return brokerapi.IsAsync(false), nil
+}
+
 func (b *serviceBroker) Deprovision(instanceID string) error {
 	return b.InstanceCreator.Destroy(instanceID, b.StatePersister)
 }
