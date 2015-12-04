@@ -12,7 +12,7 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/testing"
-	"github.com/pivotal-cf/brokerapi"
+	"github.com/ldmberman/brokerapi"
 	"github.com/pivotal-golang/lager"
 
 	. "github.com/onsi/ginkgo"

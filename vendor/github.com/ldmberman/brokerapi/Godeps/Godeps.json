@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/pivotal-cf/brokerapi",
+	"ImportPath": "github.com/ldmberman/brokerapi",
 	"GoVersion": "go1.3.1",
 	"Packages": [
 		"./..."

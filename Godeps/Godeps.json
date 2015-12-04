@@ -10,12 +10,20 @@
 			"Rev": "55a459c2d9da2b078f0725e5fb324823b2c71702"
 		},
 		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "087949061006daa57b3a3be58d77092cf65f6cf7"
+		},
+		{
 			"ImportPath": "github.com/gorilla/context",
 			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
 		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Rev": "9c068cf16d982f8bd444b8c352acbeec34c4fe5b"
+		},
+		{
+			"ImportPath": "github.com/ldmberman/brokerapi",
+			"Rev": "f3cc837f2ec03caa833baf0c5694cb8fd3bd5abc"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
@@ -26,10 +34,6 @@
 			"ImportPath": "github.com/onsi/gomega",
 			"Comment": "v1.0-71-g2152b45",
 			"Rev": "2152b45fa28a361beba9aab0885972323a444e28"
-		},
-		{
-			"ImportPath": "github.com/pivotal-cf/brokerapi",
-			"Rev": "f6649a693bd5cb91a41d8c0575cfbdb4c1baf92c"
 		},
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",
