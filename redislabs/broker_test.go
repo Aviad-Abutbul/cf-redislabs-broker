@@ -288,4 +288,14 @@ var _ = Describe("Broker", func() {
 			})
 		})
 	})
+
+	Describe("Updating instances", func() {
+		Context("When there are no instances", func() {
+			It("Fails", func() {
+				_, err := broker.Update("test-instance", brokerapi.UpdateDetails{}, false)
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
+			})
+		})
+	})
 })
