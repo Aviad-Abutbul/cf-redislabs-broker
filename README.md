@@ -47,7 +47,11 @@ go test ./redislabs/...
 
 ### Adding a dependency
 
-TODO
+* Install [godep](https://github.com/tools/godep)
+* Install the dependency (eg via `go get`) and ensure everything works fine
+* `godep save ./...`
+* Check that the output of `git diff vendor/ Godeps/` looks reasonable
+* Commit `vendor/` and `Godeps/`
 
 ### Starting the service
 
