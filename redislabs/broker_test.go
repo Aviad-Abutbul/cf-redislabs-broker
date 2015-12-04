@@ -1,7 +1,9 @@
 package redislabs_test
 
 import (
+	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path"
 
@@ -295,6 +297,151 @@ var _ = Describe("Broker", func() {
 				_, err := broker.Update("test-instance", brokerapi.UpdateDetails{}, false)
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
+			})
+		})
+		Context("When there is an instance to update", func() {
+			var (
+				proxy       testing.HTTPProxy
+				tmpStateDir string
+				err         error
+
+				memoryLimit, shardCount int64
+				replication             bool
+			)
+			BeforeEach(func() {
+				tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
+				if err != nil {
+					panic(err)
+				}
+				persister = persisters.NewLocalPersister(path.Join(tmpStateDir, "state.json"))
+
+				proxy = testing.NewHTTPProxy()
+				proxy.RegisterEndpoints([]testing.Endpoint{
+					{"/v1/bdbs", map[string]interface{}{
+						"uid": 1,
+						"authentication_redis_pass": "pass",
+						"endpoint_ip":               []string{"10.0.2.4"},
+						"dns_address_master":        "domain.com:11909",
+						"status":                    "active",
+					}}})
+				proxy.RegisterEndpointHandler("/v1/bdbs/1", func(r *http.Request) interface{} {
+					bytes, err := ioutil.ReadAll(r.Body)
+					if err != nil {
+						panic(err)
+					}
+					js := map[string]interface{}{}
+					if err = json.Unmarshal(bytes, &js); err != nil {
+						return map[string]interface{}{
+							"error_message": "invalid input data",
+						}
+					}
+					if memoryLimitJS, ok := js["memory_limit"]; ok {
+						memoryLimit = int64(memoryLimitJS.(float64))
+					}
+					if replicationJS, ok := js["replication"]; ok {
+						replication = replicationJS.(bool)
+					}
+					if shardCountJS, ok := js["shard_count"]; ok {
+						shardCount = int64(shardCountJS.(float64))
+					}
+					return nil
+				})
+
+				config = brokerconfig.Config{
+					ServiceBroker: brokerconfig.ServiceBrokerConfig{
+						ServiceID: "test-service",
+						Plans: []brokerconfig.ServicePlanConfig{
+							{
+								ID:          "test-plan-1",
+								Name:        "test-1",
+								Description: "",
+								ServiceInstanceConfig: brokerconfig.ServiceInstanceConfig{
+									MemoryLimit: 200000000,
+									Replication: false,
+									ShardCount:  1,
+								},
+							},
+							{
+								ID:   "test-plan-2",
+								Name: "test-2",
+								ServiceInstanceConfig: brokerconfig.ServiceInstanceConfig{
+									MemoryLimit: 700000000,
+									Replication: true,
+									ShardCount:  2,
+								},
+							},
+						},
+					},
+					Redislabs: brokerconfig.RedislabsConfig{
+						Address: proxy.URL(),
+					},
+				}
+			})
+			AfterEach(func() {
+				proxy.Close()
+				os.RemoveAll(tmpStateDir)
+			})
+			JustBeforeEach(func() {
+				_, err = broker.Provision("test-instance", brokerapi.ProvisionDetails{
+					ID:               "test-service",
+					PlanID:           "test-plan-1",
+					OrganizationGUID: "",
+					SpaceGUID:        "",
+				}, false)
+				if err != nil {
+					panic(err)
+				}
+			})
+			It("Updates its memory limit", func() {
+				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
+					ID: "test-service",
+					Parameters: map[string]interface{}{
+						"memory_limit": 400000000,
+					},
+				}, false)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(memoryLimit).To(Equal(400000000))
+			})
+			It("Updates its plan", func() {
+				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
+					ID:     "test-service",
+					PlanID: "test-plan-2",
+				}, false)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(memoryLimit).To(Equal(700000000))
+				Expect(replication).To(Equal(true))
+				Expect(shardCount).To(Equal(2))
+			})
+			It("Updates both its plan and memory limit", func() {
+				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
+					ID:     "test-service",
+					PlanID: "test-plan-2",
+					Parameters: map[string]interface{}{
+						"memory_limit": 300000000,
+					},
+				}, false)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(memoryLimit).To(Equal(300000000))
+				Expect(replication).To(Equal(true))
+				Expect(shardCount).To(Equal(2))
+			})
+			It("Rejects to update it to an unknown plan", func() {
+				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
+					ID:     "test-service",
+					PlanID: "test-plan-3",
+				}, false)
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(redislabs.ErrPlanDoesNotExist))
+			})
+			It("Fails to process invalid data", func() {
+				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
+					ID: "test-service",
+					Parameters: map[string]interface{}{
+						"memory_limit": "{{{",
+					},
+				}, false)
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(instancecreators.ErrInvalidUpdateData))
 			})
 		})
 	})
