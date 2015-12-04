@@ -111,7 +111,7 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 }
 
 func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.UpdateDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
-	return brokerapi.IsAsync(false), nil
+	return brokerapi.IsAsync(false), brokerapi.ErrInstanceDoesNotExist
 }
 
 func (b *serviceBroker) Deprovision(instanceID string) error {
