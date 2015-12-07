@@ -324,15 +324,16 @@ var _ = Describe("Broker", func() {
 						"dns_address_master":        "domain.com:11909",
 						"status":                    "active",
 					}}})
-				proxy.RegisterEndpointHandler("/v1/bdbs/1", func(r *http.Request) interface{} {
+				proxy.RegisterEndpointHandler("/v1/bdbs/1", func(w http.ResponseWriter, r *http.Request) interface{} {
 					bytes, err := ioutil.ReadAll(r.Body)
 					if err != nil {
 						panic(err)
 					}
 					js := map[string]interface{}{}
 					if err = json.Unmarshal(bytes, &js); err != nil {
+						w.WriteHeader(422)
 						return map[string]interface{}{
-							"error_message": "invalid input data",
+							"description": "invalid input data",
 						}
 					}
 					if memoryLimitJS, ok := js["memory_limit"]; ok {
