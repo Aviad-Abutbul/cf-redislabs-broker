@@ -293,8 +293,15 @@ var _ = Describe("Broker", func() {
 
 	Describe("Updating instances", func() {
 		Context("When there are no instances", func() {
+			BeforeEach(func() {
+				config = brokerconfig.Config{
+					ServiceBroker: brokerconfig.ServiceBrokerConfig{
+						ServiceID: "test-service",
+					},
+				}
+			})
 			It("Fails", func() {
-				_, err := broker.Update("test-instance", brokerapi.UpdateDetails{}, false)
+				_, err := broker.Update("test-instance", brokerapi.UpdateDetails{ID: "test-service"}, false)
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
 			})
