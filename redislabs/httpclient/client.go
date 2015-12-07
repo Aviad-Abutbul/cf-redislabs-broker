@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"bytes"
 	"crypto/tls"
 	"net"
 	"net/http"
@@ -123,7 +124,7 @@ func (c *httpClient) performRequest(verb string, path string, params HTTPParams,
 		},
 	)
 	requestURL := c.buildFullRequestURL(path, params)
-	req, err := http.NewRequest(verb, requestURL, nil)
+	req, err := http.NewRequest(verb, requestURL, bytes.NewReader(payload))
 	if err != nil {
 		return &http.Response{}, err
 	}
