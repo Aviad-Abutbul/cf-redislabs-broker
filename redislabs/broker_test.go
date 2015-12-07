@@ -458,6 +458,16 @@ var _ = Describe("Broker", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(cluster.ErrInvalidType("memory_size")))
 			})
+			It("Fails to process unknown properties", func() {
+				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
+					ID: "test-service",
+					Parameters: map[string]interface{}{
+						"unknown": 0,
+					},
+				}, false)
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(cluster.ErrUnknownParam("unknown")))
+			})
 		})
 	})
 })
