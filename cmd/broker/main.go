@@ -34,7 +34,8 @@ func main() {
 	brokerLogger.RegisterSink(lager.NewWriterSink(os.Stderr, lager.ERROR))
 
 	if brokerConfigPath == "" {
-		brokerLogger.Fatal("No config file specified", nil)
+		brokerLogger.Error("No config file specified", nil)
+		return
 	}
 
 	brokerLogger.Info("Config File: " + brokerConfigPath)
