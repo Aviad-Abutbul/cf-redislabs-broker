@@ -312,7 +312,7 @@ var _ = Describe("Broker", func() {
 				tmpStateDir string
 				err         error
 
-				memoryLimit, shardCount int64
+				memoryLimit, shardCount int
 				replication             bool
 			)
 			BeforeEach(func() {
@@ -343,14 +343,14 @@ var _ = Describe("Broker", func() {
 							"description": "invalid input data",
 						}
 					}
-					if memoryLimitJS, ok := js["memory_limit"]; ok {
-						memoryLimit = int64(memoryLimitJS.(float64))
+					if memoryLimitJS, ok := js["memory_size"]; ok {
+						memoryLimit = int(memoryLimitJS.(float64))
 					}
 					if replicationJS, ok := js["replication"]; ok {
 						replication = replicationJS.(bool)
 					}
-					if shardCountJS, ok := js["shard_count"]; ok {
-						shardCount = int64(shardCountJS.(float64))
+					if shardCountJS, ok := js["shards_count"]; ok {
+						shardCount = int(shardCountJS.(float64))
 					}
 					return nil
 				})
@@ -404,7 +404,7 @@ var _ = Describe("Broker", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
 					ID: "test-service",
 					Parameters: map[string]interface{}{
-						"memory_limit": 400000000,
+						"memory_size": 400000000,
 					},
 				}, false)
 				Expect(err).NotTo(HaveOccurred())
@@ -425,7 +425,7 @@ var _ = Describe("Broker", func() {
 					ID:     "test-service",
 					PlanID: "test-plan-2",
 					Parameters: map[string]interface{}{
-						"memory_limit": 300000000,
+						"memory_size": 300000000,
 					},
 				}, false)
 				Expect(err).NotTo(HaveOccurred())
