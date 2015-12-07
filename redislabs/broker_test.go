@@ -441,15 +441,15 @@ var _ = Describe("Broker", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(redislabs.ErrPlanDoesNotExist))
 			})
-			It("Fails to process invalid data", func() {
+			It("Fails to process data of invalid type", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
 					ID: "test-service",
 					Parameters: map[string]interface{}{
-						"memory_limit": "{{{",
+						"memory_size": "{{{",
 					},
 				}, false)
 				Expect(err).To(HaveOccurred())
-				Expect(err).To(Equal(instancecreators.ErrInvalidUpdateData))
+				Expect(err).To(Equal(cluster.ErrInvalidType("memory_size")))
 			})
 		})
 	})
