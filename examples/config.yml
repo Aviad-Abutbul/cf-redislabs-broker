@@ -1,36 +1,41 @@
 --
 redislabs:
   auth:
-    password: password
-    username: username
+    password: <API_PASSWORD>
+    username: <API_USERNAME>
 
 broker:
   port: 8080
   auth:
-    password: password
-    username: username
-  service_id: <SERVICE_ID>
-  state_persister:
-    file: /tmp/redislabs-statefile.json
+    password: <BROKER_PASSWORD>
+    username: <BROKER_USERNAME>
+  service_id: redislabs-redis-cluster
   plans:
   - name: minimal
-    id: <MINIMAL_PLAN_ID>
-    description: "1 shard, no HA, no snapshots, 1gb of memory"
+    id: redislabs-minimal
+    description: "1 database instance, no HA, 1gb of memory"
     settings:
-      memory: 512
+      memory: 1024
       replication: false
       shard_count: 1
-  - name: medium
-    id: <MEDIUM_PLAN_ID>
-    description: "1 shard, no HA, no snapshots, 1gb of memory"
+  - name: replicated
+    id: redislabs-replicated
+    description: "2 database instances, no HA, 2gb of memory"
     settings:
-      memory: 512
+      memory: 2048
       replication: false
-      shard_count: 1
-  - name: ha
-    id: <LARGE_PLAN_ID>
-    description: "1 shard, no HA, no snapshots, 1gb of memory"
+      shard_count: 2
+  - name: cluster
+    id: redislabs-cluster
+    description: "1 database instance, HA, 10gb of memory"
     settings:
-      memory: 512
-      replication: false
+      memory: 10240
+      replication: true
       shard_count: 1
+  - name: cluster-ha
+    id: redislabs-cluster-ha
+    description: "2 database instances, HA, 20gb of memory"
+    settings:
+      memory: 20480
+      replication: true
+      shard_count: 4
