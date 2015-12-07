@@ -11,6 +11,7 @@ import (
 
 type ServiceInstanceCreator interface {
 	Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error
+	Update(instanceID string, params map[string]interface{}, persister persisters.StatePersister) error
 	Destroy(instanceID string, persister persisters.StatePersister) error
 	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
 }
@@ -111,7 +112,38 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 }
 
 func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.UpdateDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
-	return brokerapi.IsAsync(false), brokerapi.ErrInstanceDoesNotExist
+	if updateDetails.ID != b.Config.ServiceBroker.ServiceID {
+		return false, ErrServiceDoesNotExist
+	}
+
+	settings := b.instanceSettings()
+	params := map[string]interface{}{}
+
+	if updateDetails.PlanID != "" {
+		// If there is a request for a plan check whether it exists.
+		plan, ok := settings[updateDetails.PlanID]
+		if !ok {
+			return brokerapi.IsAsync(false), ErrPlanDoesNotExist
+		}
+		// Record parameters coming from the plan change.
+		params = map[string]interface{}{
+			"memory_size":  plan.MemoryLimit,
+			"replication":  plan.Replication,
+			"shards_count": plan.ShardCount,
+		}
+	}
+
+	// Check whether additional parameters are valid.
+	if err := cluster.CheckUpdateParameters(updateDetails.Parameters); err != nil {
+		b.Logger.Error("Invalid update JSON data", err)
+		return brokerapi.IsAsync(false), err
+	}
+	// Record additional parameters.
+	for param, value := range updateDetails.Parameters {
+		params[param] = value
+	}
+
+	return brokerapi.IsAsync(false), b.InstanceCreator.Update(instanceID, params, b.StatePersister)
 }
 
 func (b *serviceBroker) Deprovision(instanceID string) error {

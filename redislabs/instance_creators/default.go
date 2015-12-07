@@ -77,6 +77,20 @@ func (d *defaultCreator) Create(instanceID string, settings cluster.InstanceSett
 	return nil
 }
 
+func (d *defaultCreator) Update(instanceID string, params map[string]interface{}, persister persisters.StatePersister) error {
+	state, err := persister.Load()
+	if err != nil {
+		d.logger.Error("Failed to load the broker state", err)
+		return err
+	}
+	for _, instance := range state.AvailableInstances {
+		if instance.ID == instanceID {
+			return d.updateDatabase(instance.Credentials.UID, params)
+		}
+	}
+	return brokerapi.ErrInstanceDoesNotExist
+}
+
 func (d *defaultCreator) Destroy(instanceID string, persister persisters.StatePersister) error {
 	state, err := persister.Load()
 	if err != nil {
@@ -132,6 +146,11 @@ func (d *defaultCreator) createDatabase(settings cluster.InstanceSettings) (clus
 			return cluster.InstanceCredentials{}, ErrCreateDatabaseTimeoutExpired
 		}
 	}
+}
+
+func (d *defaultCreator) updateDatabase(UID int, params map[string]interface{}) error {
+	api := apiclient.New(d.conf, d.logger)
+	return api.UpdateDatabase(UID, params)
 }
 
 func (d *defaultCreator) deleteDatabase(UID int) error {

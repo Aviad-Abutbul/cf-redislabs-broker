@@ -106,6 +106,43 @@ func (c *apiClient) CreateDatabase(settings cluster.InstanceSettings) (chan clus
 	return ch, nil
 }
 
+func (c *apiClient) UpdateDatabase(UID int, params map[string]interface{}) error {
+	httpClient := c.httpClient()
+
+	bytes, err := json.Marshal(params)
+	if err != nil {
+		c.logger.Error("Failed to serialize update parameters", err)
+	}
+
+	c.logger.Info("Sending a database update request", lager.Data{
+		"UID":        UID,
+		"Parameters": params,
+	})
+	res, err := httpClient.Put(fmt.Sprintf("/v1/bdbs/%d", UID), httpclient.HTTPPayload(bytes))
+	if err != nil {
+		c.logger.Error("Failed to perform an update request", err, lager.Data{
+			"UID": UID,
+		})
+	}
+
+	if res.StatusCode != 200 {
+		payload, err := c.parseErrorResponse(res)
+		if err != nil {
+			return err
+		}
+		err = fmt.Errorf(payload.ErrorMessage)
+		c.logger.Error("Failed to update the database", err, lager.Data{
+			"UID": UID,
+		})
+		return err
+	}
+
+	c.logger.Info("The database update has been scheduled", lager.Data{
+		"UID": UID,
+	})
+	return nil
+}
+
 func (c *apiClient) DeleteDatabase(UID int) error {
 	httpClient := c.httpClient()
 
