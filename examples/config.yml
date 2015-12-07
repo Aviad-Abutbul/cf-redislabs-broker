@@ -3,6 +3,7 @@ redislabs:
   auth:
     password: <API_PASSWORD>
     username: <API_USERNAME>
+    address: <API_ADDRESS>
 
 broker:
   port: 8080
