@@ -1,22 +1,28 @@
-# redislabs-service-broker
+# Cloud Foundry Service Broker for Redis Labs
 
+## Installing the service
 
-## TODOs
+TODO create a release
 
-- [ ] Configuration management including:
-  - [ ] admin creds
-  - [ ] plans list
-  - [ ] nats config
-  - [ ] node list
-  - [ ] under the question: database connection for persistence (redis or psql)
-- [ ] Broker API
-  - [ ] services (list plans)
-  - [ ] provision
-  - [ ] deprovision
-  - [ ] bind
-  - [ ] ? unbind
-- [ ] User management
-- [ ] Logging
+## Using the service
+
+Start the service pointing it to a config file:
+
+```
+redislabs-service-broker -c /path/to/config.yml
+```
+
+You can find a template for the config file in an `examples` [folder](https://github.com/Altoros/cf-redislabs-broker/tree/master/examples/config.yml). Replace the values enclosed in `<>` with the actual parameter values.
+
+### Logs
+
+The program logs DEBUG-level info to `stdout` and errors to `stderr`.
+
+### Internal state
+
+The broker stores its state in a JSON file located in a `$HOME/.redislabs-broker` folder. NOTE: Do not change the contents of this folder manually.
+
+The persistence is implemented as a pluggable backend. Therefore, an option of storing the state in a SQL/NoSQL database may appear soon in the future.
 
 ## Development
 
@@ -52,11 +58,3 @@ go test ./redislabs/...
 * `godep save ./...`
 * Check that the output of `git diff vendor/ Godeps/` looks reasonable
 * Commit `vendor/` and `Godeps/`
-
-### Starting the service
-
-```
-./out/redislabs-service-broker -c config.yml
-```
-
-You can find a sample of the config file in an `examples` [folder](https://github.com/Altoros/cf-redislabs-broker/tree/master/examples).
