@@ -292,6 +292,13 @@ var _ = Describe("Broker", func() {
 	})
 
 	Describe("Updating instances", func() {
+		Context("When the broker does not offer any services", func() {
+			It("An update fails", func() {
+				_, err := broker.Update("test-instance", brokerapi.UpdateDetails{}, false)
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(redislabs.ErrServiceDoesNotExist))
+			})
+		})
 		Context("When there are no instances", func() {
 			BeforeEach(func() {
 				config = brokerconfig.Config{
