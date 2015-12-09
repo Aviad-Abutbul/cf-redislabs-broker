@@ -188,7 +188,10 @@ func (c *apiClient) parseErrorResponse(res *http.Response) (errorResponse, error
 		err = json.Unmarshal(bytes, &payload)
 	}
 	if err != nil {
-		c.logger.Error("Failed to parse the error response payload", err)
+		c.logger.Error("Failed to parse the error response payload", err, lager.Data{
+			"response": string(bytes),
+		})
+		err = fmt.Errorf("an unknown server error occurred")
 	}
 	return payload, err
 }
