@@ -63,5 +63,5 @@ func main() {
 
 	brokerAPI := brokerapi.New(serviceBroker, brokerLogger, credentials)
 	http.Handle("/", brokerAPI)
-	http.ListenAndServe(fmt.Sprintf(":%s", conf.ServiceBroker.Port), nil)
+	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServiceBroker.Port), nil)
 }
