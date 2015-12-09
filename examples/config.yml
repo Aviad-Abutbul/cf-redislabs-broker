@@ -2,7 +2,7 @@ redislabs:
   auth:
     password: <API_PASSWORD>
     username: <API_USERNAME>
-    address: <API_ADDRESS>
+  address: <API_ADDRESS>
 
 broker:
   port: 8080
@@ -10,7 +10,7 @@ broker:
     password: <BROKER_PASSWORD>
     username: <BROKER_USERNAME>
   service_id: redislabs-redis-cluster
-  name: "redislabs redis cluster"
+  name: redislabs-redis-cluster
   description: "Enterprise-class Redis cluster by Redis Labs"
   plans:
   - name: minimal
