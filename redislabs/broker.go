@@ -57,10 +57,13 @@ func (b *serviceBroker) Services() []brokerapi.Service {
 	}
 	return []brokerapi.Service{
 		brokerapi.Service{
-			ID:          b.Config.ServiceBroker.ServiceID,
-			Name:        b.Config.ServiceBroker.Name,
-			Description: b.Config.ServiceBroker.Description,
-			Plans:       planList,
+			ID:            b.Config.ServiceBroker.ServiceID,
+			Name:          b.Config.ServiceBroker.Name,
+			Description:   b.Config.ServiceBroker.Description,
+			Bindable:      true,
+			Tags:          []string{"redislabs"},
+			Plans:         planList,
+			PlanUpdatable: true,
 		},
 	}
 }
