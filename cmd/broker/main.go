@@ -63,5 +63,8 @@ func main() {
 
 	brokerAPI := brokerapi.New(serviceBroker, brokerLogger, credentials)
 	http.Handle("/", brokerAPI)
-	http.ListenAndServe(fmt.Sprintf(":%d", conf.ServiceBroker.Port), nil)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", conf.ServiceBroker.Port), nil)
+	if err != nil {
+		brokerLogger.Error("Failed to start the server", err)
+	}
 }
