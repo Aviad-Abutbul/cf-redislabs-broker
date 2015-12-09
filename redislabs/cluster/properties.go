@@ -9,6 +9,7 @@ import (
 // InstanceSettings is a JSON serializable collection of properties necessary
 // for the creation of a cluster instance (database).
 type InstanceSettings struct {
+	Name        string `json:"name"`
 	MemoryLimit int64  `json:"memory_size"`
 	Replication bool   `json:"replication"`
 	ShardCount  int64  `json:"shards_count"`

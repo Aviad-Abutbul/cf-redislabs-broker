@@ -1,6 +1,8 @@
 package redislabs
 
 import (
+	"fmt"
+
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/passwords"
@@ -82,6 +84,7 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 		b.Logger.Error("Failed to generate a password", err)
 		return false, err
 	}
+	settings.Name = fmt.Sprintf("db-%s", instanceID)
 	settings.Password = password
 	return false, b.InstanceCreator.Create(instanceID, *settings, b.StatePersister)
 }
