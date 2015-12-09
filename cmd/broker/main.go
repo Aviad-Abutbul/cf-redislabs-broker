@@ -38,11 +38,11 @@ func main() {
 		return
 	}
 
-	brokerLogger.Info("Config File: " + brokerConfigPath)
+	brokerLogger.Info("Using config file: " + brokerConfigPath)
 
 	conf, err := config.LoadFromFile(brokerConfigPath)
 	if err != nil {
-		brokerLogger.Error("Loading config file", err, lager.Data{
+		brokerLogger.Error("Failed to load the config file", err, lager.Data{
 			"broker-config-path": brokerConfigPath,
 		})
 		return
