@@ -136,5 +136,6 @@ func (c *httpClient) performRequest(verb string, path string, params HTTPParams,
 		return &http.Response{}, err
 	}
 	req.SetBasicAuth(c.username, c.password)
+	req.Header.Add("Content-Type", "application/json")
 	return c.client.Do(req)
 }
