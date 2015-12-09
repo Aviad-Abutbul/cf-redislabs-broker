@@ -42,9 +42,10 @@ func main() {
 
 	conf, err := config.LoadFromFile(brokerConfigPath)
 	if err != nil {
-		brokerLogger.Fatal("Loading config file", err, lager.Data{
+		brokerLogger.Error("Loading config file", err, lager.Data{
 			"broker-config-path": brokerConfigPath,
 		})
+		return
 	}
 
 	serviceBroker := redislabs.NewServiceBroker(
