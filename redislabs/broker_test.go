@@ -506,6 +506,28 @@ var _ = Describe("Broker", func() {
 					Description: "plan description",
 				}))
 			})
+			It("Assigns a tag", func() {
+				services := broker.Services()
+				Expect(len(services)).To(Equal(1))
+				service := services[0]
+
+				Expect(len(service.Tags)).To(Equal(1))
+				Expect(service.Tags[0]).To(Equal("redislabs"))
+			})
+			It("Says that it is bindable", func() {
+				services := broker.Services()
+				Expect(len(services)).To(Equal(1))
+				service := services[0]
+
+				Expect(service.Bindable).To(Equal(true))
+			})
+			It("Says that the plan is updatable", func() {
+				services := broker.Services()
+				Expect(len(services)).To(Equal(1))
+				service := services[0]
+
+				Expect(service.PlanUpdatable).To(Equal(true))
+			})
 		})
 	})
 })
