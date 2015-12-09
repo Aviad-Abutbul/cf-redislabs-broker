@@ -18,11 +18,12 @@ type RedislabsConfig struct {
 }
 
 type ServiceBrokerConfig struct {
-	Auth      AuthConfig          `yaml:"auth"`
-	Plans     []ServicePlanConfig `yaml:"plans"`
-	ServiceID string              `yaml:"service_id"`
-	Port      int                 `yaml:"port"`
-	Name      string              `yaml:"name"`
+	Auth        AuthConfig          `yaml:"auth"`
+	Plans       []ServicePlanConfig `yaml:"plans"`
+	ServiceID   string              `yaml:"service_id"`
+	Port        int                 `yaml:"port"`
+	Name        string              `yaml:"name"`
+	Description string              `yaml:"description"`
 }
 
 type AuthConfig struct {
