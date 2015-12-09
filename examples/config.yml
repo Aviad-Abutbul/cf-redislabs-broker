@@ -1,4 +1,3 @@
---
 redislabs:
   auth:
     password: <API_PASSWORD>
