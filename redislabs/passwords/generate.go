@@ -2,7 +2,7 @@ package passwords
 
 import (
 	"crypto/rand"
-	"io"
+	"math/big"
 )
 
 var (
@@ -14,38 +14,12 @@ var (
 // Password characters are taken from the passwords.Characters set.
 func Generate(length int) (string, error) {
 	pass := []byte{}
-
-	min, max := minMax(Characters)
 	for len(pass) < length {
-		chunk := make([]byte, length)
-		_, err := io.ReadFull(rand.Reader, chunk)
+		pos, err := rand.Int(rand.Reader, big.NewInt(int64(len(Characters))))
 		if err != nil {
 			return "", err
 		}
-		for _, c := range chunk {
-			if c > max || c < min {
-				continue
-			}
-			pass = append(pass, c)
-		}
+		pass = append(pass, Characters[pos.Int64()])
 	}
 	return string(pass), nil
-}
-
-func minMax(bytes []byte) (byte, byte) {
-	if len(bytes) == 0 {
-		panic("minMax has been called with an empty byte array")
-	}
-	var (
-		min = bytes[0]
-		max = bytes[0]
-	)
-	for _, b := range bytes {
-		if b < min {
-			min = b
-		} else if b > max {
-			max = b
-		}
-	}
-	return min, max
 }
