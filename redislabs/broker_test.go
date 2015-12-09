@@ -470,4 +470,42 @@ var _ = Describe("Broker", func() {
 			})
 		})
 	})
+
+	Describe("Fetching the catalog", func() {
+		Context("Given a config with a service with the ID, name, description, and plan", func() {
+			BeforeEach(func() {
+				config = brokerconfig.Config{
+					ServiceBroker: brokerconfig.ServiceBrokerConfig{
+						ServiceID:   "redislabs-test",
+						Name:        "redislabs test",
+						Description: "redislabs description",
+						Plans: []brokerconfig.ServicePlanConfig{
+							{
+								ID:          "plan-1",
+								Name:        "plan",
+								Description: "plan description",
+							},
+						},
+					},
+				}
+			})
+			It("Provides them via a catalog request", func() {
+				services := broker.Services()
+				Expect(len(services)).To(Equal(1))
+
+				service := services[0]
+				Expect(service.ID).To(Equal("redislabs-test"))
+				Expect(service.Name).To(Equal("redislabs test"))
+				Expect(service.Description).To(Equal("redislabs description"))
+				Expect(len(service.Plans)).To(Equal(1))
+
+				plan := service.Plans[0]
+				Expect(plan).To(Equal(brokerapi.ServicePlan{
+					ID:          "plan-1",
+					Name:        "plan",
+					Description: "plan description",
+				}))
+			})
+		})
+	})
 })
