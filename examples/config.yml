@@ -17,27 +17,27 @@ broker:
     id: redislabs-minimal
     description: "1 database instance, no HA, 1gb of memory"
     settings:
-      memory: 1024
+      memory: 1024000000
       replication: false
       shard_count: 1
   - name: replicated
     id: redislabs-replicated
     description: "2 database instances, no HA, 2gb of memory"
     settings:
-      memory: 2048
+      memory: 2048000000
       replication: false
       shard_count: 2
   - name: cluster
     id: redislabs-cluster
     description: "1 database instance, HA, 10gb of memory"
     settings:
-      memory: 10240
+      memory: 10240000000
       replication: true
       shard_count: 1
   - name: cluster-ha
     id: redislabs-cluster-ha
     description: "2 database instances, HA, 20gb of memory"
     settings:
-      memory: 20480
+      memory: 20480000000
       replication: true
       shard_count: 4
