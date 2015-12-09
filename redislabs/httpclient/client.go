@@ -3,6 +3,7 @@ package httpclient
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"net"
 	"net/http"
 	"net/url"
@@ -59,9 +60,11 @@ func New(username string, password string, address string, port int, logger lage
 func (c *httpClient) Put(endpoint string, payload HTTPPayload) (*http.Response, error) {
 	response, err := c.performRequest("PUT", endpoint, HTTPParams{}, payload)
 	if err != nil {
+		var js interface{}
+		json.Unmarshal(payload, &js)
 		c.logger.Error("Performing PUT request", err, lager.Data{
 			"endoint": endpoint,
-			"payload": payload,
+			"payload": js,
 		})
 		return nil, err
 	}
@@ -71,9 +74,11 @@ func (c *httpClient) Put(endpoint string, payload HTTPPayload) (*http.Response, 
 func (c *httpClient) Post(endpoint string, payload HTTPPayload) (*http.Response, error) {
 	response, err := c.performRequest("POST", endpoint, HTTPParams{}, payload)
 	if err != nil {
+		var js interface{}
+		json.Unmarshal(payload, &js)
 		c.logger.Error("Performing POST request", err, lager.Data{
 			"endoint": endpoint,
-			"payload": payload,
+			"payload": js,
 		})
 		return nil, err
 	}
@@ -114,13 +119,15 @@ func (c *httpClient) buildFullRequestURL(path string, params HTTPParams) string 
 }
 
 func (c *httpClient) performRequest(verb string, path string, params HTTPParams, payload HTTPPayload) (*http.Response, error) {
+	var js interface{}
+	json.Unmarshal(payload, &js)
 	c.logger.Info(
 		"Preparing to perform a request",
 		lager.Data{
 			"verb":    verb,
 			"path":    path,
 			"params":  params,
-			"payload": payload,
+			"payload": js,
 		},
 	)
 	requestURL := c.buildFullRequestURL(path, params)
