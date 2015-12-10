@@ -112,12 +112,13 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 	}
 
 	// Check whether additional parameters are valid.
-	if err := cluster.CheckUpdateParameters(updateDetails.Parameters); err != nil {
+	additionalParams, err := cluster.CheckUpdateParameters(updateDetails.Parameters)
+	if err != nil {
 		b.Logger.Error("Invalid update JSON data", err)
 		return brokerapi.IsAsync(false), err
 	}
 	// Record additional parameters.
-	for param, value := range updateDetails.Parameters {
+	for param, value := range additionalParams {
 		params[param] = value
 	}
 

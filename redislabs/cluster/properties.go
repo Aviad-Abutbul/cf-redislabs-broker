@@ -3,6 +3,7 @@ package cluster
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -32,22 +33,41 @@ type updateParameters struct {
 }
 
 // CheckUpdateParameters verifies the contract for additional (not coming from
-// a plan change) properties of the cluster allowed to be updated.
-func CheckUpdateParameters(params map[string]interface{}) error {
+// a plan change) properties of the cluster allowed to be updated. Also,
+// CheckUpdateParameters returns a map with some values representation fixes.
+func CheckUpdateParameters(params map[string]interface{}) (map[string]interface{}, error) {
 	updatables := updateParametersJSONKeys()
 	for k, v := range params {
 		if !contains(updatables, k) {
-			return ErrUnknownParam(k)
+			return params, ErrUnknownParam(k)
+		}
+		if k == "memory_size" {
+			// This is a dirty hack for the purpose of transforming
+			// the number parsed in the exponent format back to the non-exponent format.
+			// We do not want to make brokerapi parse numbers into json.Numbers to
+			// avoid extra deviations from master (the need for json.Numbers is unlikely
+			// to be the common case). Neither do we want to support reflection-based
+			// mess for checking types.
+			fv, isFloat := v.(float64)
+			if isFloat {
+				s := strconv.FormatFloat(fv, 'f', -1, 64)
+				i, err := strconv.ParseInt(s, 10, 64)
+				if err != nil {
+					return params, err //ErrInvalidType(k)
+				}
+				v = i
+				params[k] = v
+			}
 		}
 		bytes, err := json.Marshal(map[string]interface{}{k: v})
 		if err != nil {
-			return ErrInvalidJSON
+			return params, ErrInvalidJSON
 		}
 		if err = json.Unmarshal(bytes, &updateParameters{}); err != nil {
-			return ErrInvalidType(k)
+			return params, ErrInvalidType(k)
 		}
 	}
-	return nil
+	return params, nil
 }
 
 func updateParametersJSONKeys() []string {
