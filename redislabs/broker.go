@@ -110,10 +110,12 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 			"shards_count":     plan.ShardCount,
 			"data_persistence": plan.Persistence,
 		}
-		if plan.Persistence == "snapshot" {
-			params["snapshot_policy"] = map[string]interface{}{
-				"writes": plan.Snapshot.Writes,
-				"secs":   plan.Snapshot.Secs,
+		if plan.Persistence == "snapshot" && len(plan.Snapshot) > 0 {
+			params["snapshot_policy"] = []interface{}{
+				map[string]interface{}{
+					"writes": plan.Snapshot[0].Writes,
+					"secs":   plan.Snapshot[0].Secs,
+				},
 			}
 		}
 	}
@@ -178,10 +180,10 @@ func (b *serviceBroker) instanceSettings() map[string]*cluster.InstanceSettings 
 			Persistence:      config.Persistence,
 		}
 		if config.Persistence == "snapshot" {
-			settings.Snapshot = cluster.Snapshot{
+			settings.Snapshot = []cluster.Snapshot{{
 				Writes: config.Snapshot.Writes,
 				Secs:   config.Snapshot.Secs,
-			}
+			}}
 		}
 		settingsByID[plan.ID] = settings
 	}

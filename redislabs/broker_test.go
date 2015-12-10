@@ -365,10 +365,10 @@ var _ = Describe("Broker", func() {
 						persistence = pJS.(string)
 					}
 					if policyJS, ok := js["snapshot_policy"]; ok {
-						policy := policyJS.(map[string]interface{})
+						policy := policyJS.([]interface{})[0]
 						snapshotPolicy = cluster.Snapshot{
-							Writes: int(policy["writes"].(float64)),
-							Secs:   int(policy["secs"].(float64)),
+							Writes: int(policy.(map[string]interface{})["writes"].(float64)),
+							Secs:   int(policy.(map[string]interface{})["secs"].(float64)),
 						}
 					}
 					return nil
