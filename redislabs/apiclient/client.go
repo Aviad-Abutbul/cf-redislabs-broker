@@ -123,6 +123,7 @@ func (c *apiClient) UpdateDatabase(UID int, params map[string]interface{}) error
 		c.logger.Error("Failed to perform an update request", err, lager.Data{
 			"UID": UID,
 		})
+		return err
 	}
 
 	if res.StatusCode != 200 {
