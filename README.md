@@ -2,7 +2,7 @@
 
 ## Installing the service
 
-TODO create a release
+Download an archive from the [releases page](https://github.com/Altoros/cf-redislabs-broker/releases). Extract the binary.
 
 ## Running the service
 
