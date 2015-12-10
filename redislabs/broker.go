@@ -163,9 +163,11 @@ func (b *serviceBroker) instanceSettings() map[string]*cluster.InstanceSettings 
 	for _, plan := range b.Config.ServiceBroker.Plans {
 		config := plan.ServiceInstanceConfig
 		settingsByID[plan.ID] = &cluster.InstanceSettings{
-			MemoryLimit: config.MemoryLimit,
-			Replication: config.Replication,
-			ShardCount:  config.ShardCount,
+			MemoryLimit:      config.MemoryLimit,
+			Replication:      config.Replication,
+			ShardCount:       config.ShardCount,
+			Sharding:         config.ShardCount > 1,
+			ImplicitShardKey: config.ShardCount > 1,
 		}
 	}
 	return settingsByID
