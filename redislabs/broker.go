@@ -110,6 +110,10 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 			"shards_count":     plan.ShardCount,
 			"data_persistence": plan.Persistence,
 		}
+		if plan.ShardCount > 1 {
+			params["sharding"] = true
+			params["implicit_shard_key"] = true
+		}
 		if plan.Persistence == "snapshot" && len(plan.Snapshot) > 0 {
 			params["snapshot_policy"] = []interface{}{
 				map[string]interface{}{
