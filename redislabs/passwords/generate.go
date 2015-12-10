@@ -7,7 +7,7 @@ import (
 
 var (
 	// Characters contains characters used for generating passwords.
-	Characters = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+,.?/:;{}[]`~")
+	Characters = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^*()-_=+,.?/:;{}[]`~")
 )
 
 // Generate returns a randomly generated password of the given strength (length).
