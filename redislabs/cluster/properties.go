@@ -10,13 +10,20 @@ import (
 // InstanceSettings is a JSON serializable collection of properties necessary
 // for the creation of a cluster instance (database).
 type InstanceSettings struct {
-	Name             string `json:"name"`
-	MemoryLimit      int64  `json:"memory_size"`
-	Replication      bool   `json:"replication"`
-	ShardCount       int64  `json:"shards_count"`
-	Sharding         bool   `json:"sharding"`
-	ImplicitShardKey bool   `json:"implicit_shard_key"`
-	Password         string `json:"authentication_redis_pass"`
+	Name             string   `json:"name"`
+	MemoryLimit      int64    `json:"memory_size"`
+	Replication      bool     `json:"replication"`
+	ShardCount       int64    `json:"shards_count"`
+	Sharding         bool     `json:"sharding"`
+	ImplicitShardKey bool     `json:"implicit_shard_key"`
+	Persistence      string   `json:"data_persistence,omitempty"`
+	Snapshot         Snapshot `json:"snapshot_policy"`
+	Password         string   `json:"authentication_redis_pass"`
+}
+
+type Snapshot struct {
+	Writes int `json:"writes"`
+	Secs   int `json:"secs"`
 }
 
 // InstanceCredentials contains properties necessary for identifying a
@@ -31,7 +38,9 @@ type InstanceCredentials struct {
 // updateParameters serves as a contract for additional cluser properties
 // allowed to be updated.
 type updateParameters struct {
-	MemoryLimit int64 `json:"memory_size"`
+	MemoryLimit int64    `json:"memory_size"`
+	Persistence string   `json:"data_persistence"`
+	Snapshot    Snapshot `json:"snapshot_policy"`
 }
 
 // CheckUpdateParameters verifies the contract for additional (not coming from

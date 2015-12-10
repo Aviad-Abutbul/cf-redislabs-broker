@@ -105,9 +105,16 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 		}
 		// Record parameters coming from the plan change.
 		params = map[string]interface{}{
-			"memory_size":  plan.MemoryLimit,
-			"replication":  plan.Replication,
-			"shards_count": plan.ShardCount,
+			"memory_size":      plan.MemoryLimit,
+			"replication":      plan.Replication,
+			"shards_count":     plan.ShardCount,
+			"data_persistence": plan.Persistence,
+		}
+		if plan.Persistence == "snapshot" {
+			params["snapshot_policy"] = map[string]interface{}{
+				"writes": plan.Snapshot.Writes,
+				"secs":   plan.Snapshot.Secs,
+			}
 		}
 	}
 
@@ -162,13 +169,21 @@ func (b *serviceBroker) instanceSettings() map[string]*cluster.InstanceSettings 
 	settingsByID := map[string]*cluster.InstanceSettings{}
 	for _, plan := range b.Config.ServiceBroker.Plans {
 		config := plan.ServiceInstanceConfig
-		settingsByID[plan.ID] = &cluster.InstanceSettings{
+		settings := &cluster.InstanceSettings{
 			MemoryLimit:      config.MemoryLimit,
 			Replication:      config.Replication,
 			ShardCount:       config.ShardCount,
 			Sharding:         config.ShardCount > 1,
 			ImplicitShardKey: config.ShardCount > 1,
+			Persistence:      config.Persistence,
 		}
+		if config.Persistence == "snapshot" {
+			settings.Snapshot = cluster.Snapshot{
+				Writes: config.Snapshot.Writes,
+				Secs:   config.Snapshot.Secs,
+			}
+		}
+		settingsByID[plan.ID] = settings
 	}
 	return settingsByID
 }

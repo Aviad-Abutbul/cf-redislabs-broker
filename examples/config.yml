@@ -15,29 +15,35 @@ broker:
   plans:
   - name: minimal
     id: redislabs-minimal
-    description: "1 database instance, no HA, 1gb of memory"
+    description: "1 database instance, no HA, 1gb of memory, no disk persistence"
     settings:
       memory: 1024000000
       replication: false
       shard_count: 1
   - name: cluster
     id: redislabs-cluster
-    description: "2 database instances, no HA, 2gb of memory"
+    description: "2 database instances, no HA, 2gb of memory, a snapshot per 1000 writes within 1 minute"
     settings:
       memory: 2048000000
       replication: false
       shard_count: 2
+      persistence: snapshot
+      snapshot:
+          writes: 1000
+          secs: 60
   - name: replicated
     id: redislabs-replicated
-    description: "1 database instance, HA, 10gb of memory"
+    description: "1 database instance, HA, 10gb of memory, aof persistence"
     settings:
       memory: 10240000000
       replication: true
       shard_count: 1
+      persistence: aof
   - name: cluster-replicated
     id: redislabs-cluster-replicated
-    description: "2 database instances, HA, 20gb of memory"
+    description: "2 database instances, HA, 20gb of memory, aof persistence"
     settings:
       memory: 20480000000
       replication: true
       shard_count: 2
+      persistence: aof

@@ -39,9 +39,16 @@ type ServicePlanConfig struct {
 }
 
 type ServiceInstanceConfig struct {
-	MemoryLimit int64 `yaml:"memory"`
-	Replication bool  `yaml:"replication"`
-	ShardCount  int64 `yaml:"shard_count"`
+	MemoryLimit int64    `yaml:"memory"`
+	Replication bool     `yaml:"replication"`
+	ShardCount  int64    `yaml:"shard_count"`
+	Persistence string   `yaml:"persistence"`
+	Snapshot    Snapshot `yaml:"snapshot"`
+}
+
+type Snapshot struct {
+	Writes int `yaml:"writes"`
+	Secs   int `yaml:"secs"`
 }
 
 func LoadFromFile(path string) (Config, error) {
