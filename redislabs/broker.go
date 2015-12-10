@@ -108,7 +108,9 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 			"memory_size":      plan.MemoryLimit,
 			"replication":      plan.Replication,
 			"shards_count":     plan.ShardCount,
-			"data_persistence": plan.Persistence,
+		}
+		if plan.Persistence != "" {
+			params["data_persistence"] = plan.Persistence
 		}
 		if plan.ShardCount > 1 {
 			params["sharding"] = true
