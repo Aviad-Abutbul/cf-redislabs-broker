@@ -15,7 +15,7 @@ broker:
   plans:
   - name: minimal
     id: redislabs-minimal
-    description: "1 database instance, no HA, 1gb of memory, no disk persistence"
+    description: "1gb of memory, no HA, no disk persistence"
     settings:
       memory: 1073741824 # 1024 * 1024 * 1024
       replication: false
@@ -23,7 +23,7 @@ broker:
       persistence: disabled
   - name: cluster
     id: redislabs-cluster
-    description: "2 database instances, no HA, 2gb of memory, a snapshot per 1000 writes within 1 minute"
+    description: "cluster mode, 2gb of memory, no HA, a snapshot per 1000 writes within 1 minute"
     settings:
       memory: 2147483648 # 2 * 1024 * 1024 * 1024
       replication: false
@@ -34,7 +34,7 @@ broker:
           secs: 60
   - name: replicated
     id: redislabs-replicated
-    description: "1 database instance, HA, 10gb of memory, aof persistence"
+    description: "10gb of memory, replicated, aof persistence"
     settings:
       memory: 10737418240 # 10 * 1024 * 1024 * 1024
       replication: true
@@ -42,7 +42,7 @@ broker:
       persistence: aof
   - name: cluster-replicated
     id: redislabs-cluster-replicated
-    description: "2 database instances, HA, 20gb of memory, aof persistence"
+    description: "cluster mode, 20gb of memory, replicated, aof persistence"
     settings:
       memory: 21474836480 # 20 * 1024 * 1024 * 1024
       replication: true
