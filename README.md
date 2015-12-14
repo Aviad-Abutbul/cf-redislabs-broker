@@ -2,7 +2,7 @@
 
 ## Installing the service
 
-Download an archive from the [releases page](https://github.com/Altoros/cf-redislabs-broker/releases). Extract the binary.
+Download an archive from the [releases page](https://github.com/Altoros/cf-redislabs-broker/releases). Extract the contents.
 
 ## Running the service
 
@@ -12,7 +12,7 @@ Start the service pointing it to a config file:
 redislabs-service-broker -c /path/to/config.yml
 ```
 
-You can find a template for the config file in an `examples` [folder](https://github.com/Altoros/cf-redislabs-broker/tree/master/examples/config.yml). Replace the values enclosed in `<>` with the actual parameter values. The properties not enclosed in `<>` are defaults that we find reasonable - you can alter them too.
+You can find a template for the config file in an `examples` [folder](https://github.com/Altoros/cf-redislabs-broker/tree/master/examples/config.yml). This template is distributed with every release as `config.yml.template`. Replace the values enclosed in `<>` with the actual parameter values. The properties not enclosed in `<>` are defaults that we find reasonable - you can alter them too.
 
 ## Using the service
 
