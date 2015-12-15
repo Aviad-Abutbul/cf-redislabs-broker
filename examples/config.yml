@@ -9,42 +9,39 @@ broker:
   auth:
     password: <BROKER_PASSWORD>
     username: <BROKER_USERNAME>
-  service_id: redislabs-redis-cluster
-  name: redislabs-redis-cluster
-  description: "Enterprise-class Redis cluster by Redis Labs"
+  service_id: redislabs-enterprise-cluster
+  name: redislabs-enterprise-cluster
+  description: "Redis Labs Enterprise Cluster by Redis Labs"
   plans:
-  - name: minimal
-    id: redislabs-minimal
-    description: "1gb of memory, no HA, no disk persistence"
+  - name: simple-redis
+    id: redislabs-simple-redis
+    description: "Redis, 1GB memory limit, no replication for HA, no persistence"
     settings:
       memory: 1073741824 # 1024 * 1024 * 1024
       replication: false
       shard_count: 1
       persistence: disabled
-  - name: cluster
-    id: redislabs-cluster
-    description: "cluster mode, 2gb of memory, no HA, a snapshot per 1000 writes within 1 minute"
+  - name: ha-redis
+    id: redislabs-ha-redis
+    description: "Redis, 2GB memory limit, with replication for HA, AOF persistence every 1 sec"
     settings:
       memory: 2147483648 # 2 * 1024 * 1024 * 1024
-      replication: false
-      shard_count: 2
-      persistence: snapshot
-      snapshot:
-          writes: 1000
-          secs: 60
-  - name: replicated
-    id: redislabs-replicated
-    description: "10gb of memory, replicated, aof persistence"
-    settings:
-      memory: 10737418240 # 10 * 1024 * 1024 * 1024
       replication: true
       shard_count: 1
       persistence: aof
-  - name: cluster-replicated
-    id: redislabs-cluster-replicated
-    description: "cluster mode, 20gb of memory, replicated, aof persistence"
+  - name: clustered-redis
+    id: redislabs-clustered-redis
+    description: "Redis, 10GB memory limit, cluster with 2 shards, no replication for HA, no persistence"
     settings:
-      memory: 21474836480 # 20 * 1024 * 1024 * 1024
+      memory: 10737418240 # 10 * 1024 * 1024 * 1024
+      replication: false
+      shard_count: 2
+      persistence: disabled
+  - name: ha-clustered-redis
+    id: redislabs-ha-clustered-redis
+    description: "Redis, 22GB memory limit, cluster with 2 shards, replication for HA, AOF persistence every 1 sec"
+    settings:
+      memory: 23622320128 # 22 * 1024 * 1024 * 1024
       replication: true
       shard_count: 2
       persistence: aof
