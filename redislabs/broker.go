@@ -59,6 +59,7 @@ func (b *serviceBroker) Services() []brokerapi.Service {
 	for _, p := range b.planDescriptions() {
 		planList = append(planList, *p)
 	}
+	b.Logger.Info("Serving a catalog request")
 	return []brokerapi.Service{
 		brokerapi.Service{
 			ID:            b.Config.ServiceBroker.ServiceID,
@@ -144,6 +145,11 @@ func (b *serviceBroker) Deprovision(instanceID string) error {
 }
 
 func (b *serviceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
+	b.Logger.Info("Looking for the service credentials", lager.Data{
+		"instance-id": instanceID,
+		"binding-id":  bindingID,
+		"details":     details,
+	})
 	return b.InstanceBinder.Bind(instanceID, bindingID, b.StatePersister)
 }
 

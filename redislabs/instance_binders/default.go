@@ -36,6 +36,9 @@ func (d *defaultBinder) Bind(instanceID string, bindingID string, persister pers
 	for _, instance := range state.AvailableInstances {
 		if instance.ID == instanceID {
 			creds := instance.Credentials
+			d.logger.Info("Returning the service credentials", lager.Data{
+				"credentials": creds,
+			})
 			return map[string]interface{}{
 				"port":     creds.Port,
 				"ip_list":  creds.IPList,
