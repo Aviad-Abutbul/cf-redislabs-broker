@@ -373,10 +373,7 @@ var _ = Describe("Broker", func() {
 				tmpStateDir string
 				err         error
 
-				memoryLimit, shardCount int
-				replication             bool
-				persistence             string
-				snapshotPolicy          cluster.Snapshot
+				updateSettings map[string]interface{}
 			)
 			BeforeEach(func() {
 				tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
@@ -399,30 +396,10 @@ var _ = Describe("Broker", func() {
 					if err != nil {
 						panic(err)
 					}
-					js := map[string]interface{}{}
-					if err = json.Unmarshal(bytes, &js); err != nil {
+					if err = json.Unmarshal(bytes, &updateSettings); err != nil {
 						w.WriteHeader(422)
 						return map[string]interface{}{
 							"description": "invalid input data",
-						}
-					}
-					if memoryLimitJS, ok := js["memory_size"]; ok {
-						memoryLimit = int(memoryLimitJS.(float64))
-					}
-					if replicationJS, ok := js["replication"]; ok {
-						replication = replicationJS.(bool)
-					}
-					if shardCountJS, ok := js["shards_count"]; ok {
-						shardCount = int(shardCountJS.(float64))
-					}
-					if pJS, ok := js["data_persistence"]; ok {
-						persistence = pJS.(string)
-					}
-					if policyJS, ok := js["snapshot_policy"]; ok {
-						policy := policyJS.([]interface{})[0]
-						snapshotPolicy = cluster.Snapshot{
-							Writes: int(policy.(map[string]interface{})["writes"].(float64)),
-							Secs:   int(policy.(map[string]interface{})["secs"].(float64)),
 						}
 					}
 					return nil
@@ -486,7 +463,8 @@ var _ = Describe("Broker", func() {
 					},
 				}, false)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(memoryLimit).To(Equal(400000000))
+				Expect(updateSettings).To(HaveKey("memory_size"))
+				Expect(updateSettings["memory_size"]).To(BeEquivalentTo(400000000))
 			})
 			It("Updates its plan", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
@@ -494,14 +472,22 @@ var _ = Describe("Broker", func() {
 					PlanID: "test-plan-2",
 				}, false)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(memoryLimit).To(Equal(700000000))
-				Expect(replication).To(Equal(true))
-				Expect(shardCount).To(Equal(2))
-				Expect(persistence).To(Equal("snapshot"))
-				Expect(snapshotPolicy).To(Equal(cluster.Snapshot{
-					Writes: 100,
-					Secs:   10,
-				}))
+				Expect(updateSettings).To(HaveKey("memory_size"))
+				Expect(updateSettings["memory_size"]).To(BeEquivalentTo(700000000))
+				Expect(updateSettings).To(HaveKey("replication"))
+				Expect(updateSettings["replication"]).To(BeEquivalentTo(true))
+				Expect(updateSettings).To(HaveKey("shards_count"))
+				Expect(updateSettings["shards_count"]).To(BeEquivalentTo(2))
+				Expect(updateSettings).To(HaveKey("sharding"))
+				Expect(updateSettings["sharding"]).To(BeEquivalentTo(true))
+				Expect(updateSettings).To(HaveKey("implicit_shard_key"))
+				Expect(updateSettings["implicit_shard_key"]).To(BeEquivalentTo(true))
+				Expect(updateSettings).To(HaveKey("data_persistence"))
+				Expect(updateSettings["data_persistence"]).To(BeEquivalentTo("snapshot"))
+				Expect(updateSettings).To(HaveKey("snapshot_policy"))
+				s := updateSettings["snapshot_policy"].([]interface{})[0].(map[string]interface{})
+				Expect(s["secs"]).To(BeEquivalentTo(10))
+				Expect(s["writes"]).To(BeEquivalentTo(100))
 			})
 			It("Updates both its plan and other parameters", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
@@ -513,10 +499,14 @@ var _ = Describe("Broker", func() {
 					},
 				}, false)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(memoryLimit).To(Equal(300000000))
-				Expect(replication).To(Equal(true))
-				Expect(shardCount).To(Equal(2))
-				Expect(persistence).To(Equal("aof"))
+				Expect(updateSettings).To(HaveKey("memory_size"))
+				Expect(updateSettings["memory_size"]).To(BeEquivalentTo(300000000))
+				Expect(updateSettings).To(HaveKey("replication"))
+				Expect(updateSettings["replication"]).To(BeEquivalentTo(true))
+				Expect(updateSettings).To(HaveKey("shards_count"))
+				Expect(updateSettings["shards_count"]).To(BeEquivalentTo(2))
+				Expect(updateSettings).To(HaveKey("data_persistence"))
+				Expect(updateSettings["data_persistence"]).To(BeEquivalentTo("aof"))
 			})
 			It("Rejects to update it to an unknown plan", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
