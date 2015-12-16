@@ -122,6 +122,7 @@ var _ = Describe("Broker", func() {
 					tmpStateDir string
 					proxy       testing.HTTPProxy
 					err         error
+					settings    cluster.InstanceSettings
 				)
 
 				BeforeEach(func() {
@@ -132,16 +133,27 @@ var _ = Describe("Broker", func() {
 					persister = persisters.NewLocalPersister(path.Join(tmpStateDir, "state.json"))
 
 					proxy = testing.NewHTTPProxy()
-					proxy.RegisterEndpoints([]testing.Endpoint{
-						{"/", map[string]interface{}{
+					proxy.RegisterEndpointHandler("/", func(w http.ResponseWriter, r *http.Request) interface{} {
+						decoder := json.NewDecoder(r.Body)
+						defer r.Body.Close()
+						if err := decoder.Decode(&settings); err != nil {
+							Expect(err).NotTo(HaveOccurred())
+						}
+						return map[string]interface{}{
 							"uid": 1,
 							"authentication_redis_pass": "pass",
 							"endpoint_ip":               []string{"10.0.2.4"},
 							"dns_address_master":        "domain.com:11909",
 							"status":                    "active",
-						}},
+						}
 					})
 					config.Redislabs.Address = proxy.URL()
+
+					config.ServiceBroker.Plans[0].ServiceInstanceConfig = brokerconfig.ServiceInstanceConfig{
+						MemoryLimit: 1024,
+						Replication: true,
+						Persistence: "disabled",
+					}
 				})
 				AfterEach(func() {
 					proxy.Close()
@@ -151,6 +163,11 @@ var _ = Describe("Broker", func() {
 				It("Creates an instance of the configured default plan", func() {
 					_, err := broker.Provision("some-id", details, false)
 					Expect(err).ToNot(HaveOccurred())
+					Expect(settings.MemoryLimit).To(Equal(int64(1024)))
+					Expect(settings.Replication).To(Equal(true))
+					Expect(settings.Persistence).To(Equal("disabled"))
+					Expect(settings.Sharding).To(Equal(false))
+					Expect(settings.ImplicitShardKey).To(Equal(false))
 				})
 				It("Rejects to provision the same instance again", func() {
 					broker.Provision("some-id", details, false)
@@ -172,6 +189,43 @@ var _ = Describe("Broker", func() {
 						IPList:   []string{"10.0.2.4"},
 						Password: "pass",
 					}))
+				})
+				Context("And when requested for more than one shard", func() {
+					BeforeEach(func() {
+						config.ServiceBroker.Plans[0].ServiceInstanceConfig = brokerconfig.ServiceInstanceConfig{
+							MemoryLimit: 2048,
+							ShardCount:  2,
+						}
+					})
+					It("Setups the sharding properly", func() {
+						_, err := broker.Provision("some-id", details, false)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(settings.MemoryLimit).To(Equal(int64(2048)))
+						Expect(settings.ShardCount).To(Equal(int64(2)))
+						Expect(settings.Sharding).To(Equal(true))
+						Expect(settings.ImplicitShardKey).To(Equal(true))
+					})
+				})
+				Context("And when requested for snapshots", func() {
+					BeforeEach(func() {
+						config.ServiceBroker.Plans[0].ServiceInstanceConfig = brokerconfig.ServiceInstanceConfig{
+							Persistence: "snapshot",
+							Snapshot: brokerconfig.Snapshot{
+								Writes: 10,
+								Secs:   12,
+							},
+						}
+					})
+					It("Applies the given snapshot configuration", func() {
+						_, err := broker.Provision("some-id", details, false)
+						Expect(err).NotTo(HaveOccurred())
+						Expect(settings.Persistence).To(Equal("snapshot"))
+						Expect(len(settings.Snapshot)).To(Equal(1))
+						Expect(settings.Snapshot[0]).To(Equal(cluster.Snapshot{
+							Writes: 10,
+							Secs:   12,
+						}))
+					})
 				})
 			})
 		})
