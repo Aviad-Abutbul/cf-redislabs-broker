@@ -10,7 +10,14 @@ import (
 // InstanceSettings is a JSON serializable collection of properties necessary
 // for the creation of a cluster instance (database).
 type InstanceSettings struct {
-	Name             string     `json:"name"`
+	Name     string `json:"name"`
+	Password string `json:"authentication_redis_pass"`
+	PlanSettings
+}
+
+// PlanSettings is a JSON serializable collection of properties that have to
+// be provided by a service plan.
+type PlanSettings struct {
 	MemoryLimit      int64      `json:"memory_size"`
 	Replication      bool       `json:"replication"`
 	ShardCount       int64      `json:"shards_count"`
@@ -18,7 +25,6 @@ type InstanceSettings struct {
 	ImplicitShardKey bool       `json:"implicit_shard_key"`
 	Persistence      string     `json:"data_persistence,omitempty"`
 	Snapshot         []Snapshot `json:"snapshot_policy,omitempty"`
-	Password         string     `json:"authentication_redis_pass"`
 }
 
 type Snapshot struct {

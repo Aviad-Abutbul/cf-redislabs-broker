@@ -1,6 +1,7 @@
 package redislabs
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
@@ -74,19 +75,22 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
 		return false, ErrServiceDoesNotExist
 	}
-	settingsByID := b.instanceSettings()
+	settingsByID := b.planSettings()
 	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
 		return false, ErrPlanDoesNotExist
 	}
-	settings := settingsByID[provisionDetails.PlanID]
+	planSettings := settingsByID[provisionDetails.PlanID]
 	password, err := passwords.Generate(RedisPasswordLength)
 	if err != nil {
 		b.Logger.Error("Failed to generate a password", err)
 		return false, err
 	}
-	settings.Name = fmt.Sprintf("db-%s", instanceID)
-	settings.Password = password
-	return false, b.InstanceCreator.Create(instanceID, *settings, b.StatePersister)
+	settings := cluster.InstanceSettings{
+		Name:         fmt.Sprintf("db-%s", instanceID),
+		Password:     password,
+		PlanSettings: *planSettings,
+	}
+	return false, b.InstanceCreator.Create(instanceID, settings, b.StatePersister)
 }
 
 func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.UpdateDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
@@ -94,7 +98,7 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 		return false, ErrServiceDoesNotExist
 	}
 
-	settings := b.instanceSettings()
+	settings := b.planSettings()
 	params := map[string]interface{}{}
 
 	if updateDetails.PlanID != "" {
@@ -104,25 +108,14 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 			return brokerapi.IsAsync(false), ErrPlanDoesNotExist
 		}
 		// Record parameters coming from the plan change.
-		params = map[string]interface{}{
-			"memory_size":      plan.MemoryLimit,
-			"replication":      plan.Replication,
-			"shards_count":     plan.ShardCount,
+		byts, err := json.Marshal(plan)
+		if err != nil {
+			b.Logger.Error("Failed to serialize the plan", err)
+			return brokerapi.IsAsync(false), err
 		}
-		if plan.Persistence != "" {
-			params["data_persistence"] = plan.Persistence
-		}
-		if plan.ShardCount > 1 {
-			params["sharding"] = true
-			params["implicit_shard_key"] = true
-		}
-		if plan.Persistence == "snapshot" && len(plan.Snapshot) > 0 {
-			params["snapshot_policy"] = []interface{}{
-				map[string]interface{}{
-					"writes": plan.Snapshot[0].Writes,
-					"secs":   plan.Snapshot[0].Secs,
-				},
-			}
+		if err = json.Unmarshal(byts, &params); err != nil {
+			b.Logger.Error("Failed to setup the plan parameters", err)
+			return brokerapi.IsAsync(false), err
 		}
 	}
 
@@ -173,11 +166,11 @@ func (b *serviceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
 	return plansByID
 }
 
-func (b *serviceBroker) instanceSettings() map[string]*cluster.InstanceSettings {
-	settingsByID := map[string]*cluster.InstanceSettings{}
+func (b *serviceBroker) planSettings() map[string]*cluster.PlanSettings {
+	settingsByID := map[string]*cluster.PlanSettings{}
 	for _, plan := range b.Config.ServiceBroker.Plans {
 		config := plan.ServiceInstanceConfig
-		settings := &cluster.InstanceSettings{
+		settings := &cluster.PlanSettings{
 			MemoryLimit:      config.MemoryLimit,
 			Replication:      config.Replication,
 			ShardCount:       config.ShardCount,
