@@ -66,6 +66,7 @@ var _ = Describe("Broker", func() {
 			serviceID                           = "test-service-id"
 			planID                              = "test-plan-id"
 			requestedServiceID, requestedPlanID string
+			params                              map[string]interface{}
 			details                             brokerapi.ProvisionDetails
 		)
 		Context("Given a config with a default plan", func() {
@@ -92,6 +93,7 @@ var _ = Describe("Broker", func() {
 					PlanID:           requestedPlanID,
 					OrganizationGUID: "",
 					SpaceGUID:        "",
+					Parameters:       params,
 				}
 			})
 			Context("And a wrong service ID", func() {
@@ -117,6 +119,30 @@ var _ = Describe("Broker", func() {
 				})
 			})
 
+			Context("And no database name", func() {
+				BeforeEach(func() {
+					requestedPlanID = planID
+				})
+				It("Complains about the database name", func() {
+					_, err := broker.Provision("some-id", details, false)
+					Expect(err).To(HaveOccurred())
+					Expect(err).To(Equal(redislabs.ErrDatabaseNameIsRequired))
+				})
+			})
+
+			Context("And an empty name for the database", func() {
+				BeforeEach(func() {
+					params = map[string]interface{}{
+						"name": "",
+					}
+				})
+				It("Complains about the database name", func() {
+					_, err := broker.Provision("some-id", details, false)
+					Expect(err).To(HaveOccurred())
+					Expect(err).To(Equal(redislabs.ErrDatabaseNameIsRequired))
+				})
+			})
+
 			Context("And given proper settings", func() {
 				var (
 					tmpStateDir string
@@ -126,8 +152,9 @@ var _ = Describe("Broker", func() {
 				)
 
 				BeforeEach(func() {
-					requestedPlanID = planID
-
+					params = map[string]interface{}{
+						"name": "test",
+					}
 					tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
 					Expect(err).NotTo(HaveOccurred())
 					persister = persisters.NewLocalPersister(path.Join(tmpStateDir, "state.json"))
@@ -454,6 +481,9 @@ var _ = Describe("Broker", func() {
 					PlanID:           "test-plan-1",
 					OrganizationGUID: "",
 					SpaceGUID:        "",
+					Parameters: map[string]interface{}{
+						"name": "test",
+					},
 				}, false)
 				if err != nil {
 					panic(err)

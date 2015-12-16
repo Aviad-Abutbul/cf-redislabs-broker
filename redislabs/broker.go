@@ -34,7 +34,8 @@ type serviceBroker struct {
 }
 
 var (
-	RedisPasswordLength = 48
+	RedisPasswordLength     = 48
+	RedisDatabaseNameLength = 63
 )
 
 func NewServiceBroker(
@@ -80,13 +81,18 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 		return false, ErrPlanDoesNotExist
 	}
 	planSettings := settingsByID[provisionDetails.PlanID]
+	name, err := b.readDatabaseName(instanceID, provisionDetails)
+	if err != nil {
+		b.Logger.Error("No database name was set", err)
+		return false, err
+	}
 	password, err := passwords.Generate(RedisPasswordLength)
 	if err != nil {
 		b.Logger.Error("Failed to generate a password", err)
 		return false, err
 	}
 	settings := cluster.InstanceSettings{
-		Name:         fmt.Sprintf("db-%s", instanceID),
+		Name:         name,
 		Password:     password,
 		PlanSettings: *planSettings,
 	}
@@ -193,4 +199,19 @@ func (b *serviceBroker) planSettings() map[string]*cluster.PlanSettings {
 		settingsByID[plan.ID] = settings
 	}
 	return settingsByID
+}
+
+func (b *serviceBroker) readDatabaseName(instanceID string, details brokerapi.ProvisionDetails) (string, error) {
+	if details.Parameters == nil {
+		return "", ErrDatabaseNameIsRequired
+	}
+	name, ok := details.Parameters["name"]
+	if !ok || name == "" {
+		return "", ErrDatabaseNameIsRequired
+	}
+	n := fmt.Sprintf("%s-%s", name, instanceID)
+	if len(n) > RedisDatabaseNameLength {
+		n = n[:RedisDatabaseNameLength]
+	}
+	return n, nil
 }
