@@ -178,6 +178,12 @@ func (b *serviceBroker) planSettings() map[string]*cluster.PlanSettings {
 			ImplicitShardKey: config.ShardCount > 1,
 			Persistence:      config.Persistence,
 		}
+		if config.ShardCount > 1 {
+			settings.ShardKeyRegex = map[string]string{
+				`.*\{(?<tag>.*)\}.*`: "Hashing is done on the substring between the curly braces.",
+				`(?<tag>.*)`:         "The entire key's name is used for hashing.",
+			}
+		}
 		if config.Persistence == "snapshot" {
 			settings.Snapshot = []cluster.Snapshot{{
 				Writes: config.Snapshot.Writes,

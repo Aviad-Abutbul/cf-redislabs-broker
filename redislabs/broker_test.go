@@ -204,6 +204,10 @@ var _ = Describe("Broker", func() {
 						Expect(settings.ShardCount).To(Equal(int64(2)))
 						Expect(settings.Sharding).To(Equal(true))
 						Expect(settings.ImplicitShardKey).To(Equal(true))
+						Expect(settings.ShardKeyRegex).To(Equal(map[string]string{
+							`.*\{(?<tag>.*)\}.*`: "Hashing is done on the substring between the curly braces.",
+							`(?<tag>.*)`:         "The entire key's name is used for hashing.",
+						}))
 					})
 				})
 				Context("And when requested for snapshots", func() {
@@ -476,12 +480,18 @@ var _ = Describe("Broker", func() {
 				Expect(updateSettings["memory_size"]).To(BeEquivalentTo(700000000))
 				Expect(updateSettings).To(HaveKey("replication"))
 				Expect(updateSettings["replication"]).To(BeEquivalentTo(true))
+
 				Expect(updateSettings).To(HaveKey("shards_count"))
 				Expect(updateSettings["shards_count"]).To(BeEquivalentTo(2))
 				Expect(updateSettings).To(HaveKey("sharding"))
 				Expect(updateSettings["sharding"]).To(BeEquivalentTo(true))
 				Expect(updateSettings).To(HaveKey("implicit_shard_key"))
 				Expect(updateSettings["implicit_shard_key"]).To(BeEquivalentTo(true))
+				Expect(updateSettings).To(HaveKey("shard_key_regex"))
+				r := updateSettings["shard_key_regex"].(map[string]interface{})
+				Expect(r[`.*\{(?<tag>.*)\}.*`]).To(BeEquivalentTo("Hashing is done on the substring between the curly braces."))
+				Expect(r[`(?<tag>.*)`]).To(BeEquivalentTo("The entire key's name is used for hashing."))
+
 				Expect(updateSettings).To(HaveKey("data_persistence"))
 				Expect(updateSettings["data_persistence"]).To(BeEquivalentTo("snapshot"))
 				Expect(updateSettings).To(HaveKey("snapshot_policy"))
