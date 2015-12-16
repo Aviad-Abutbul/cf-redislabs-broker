@@ -70,7 +70,7 @@ func CheckUpdateParameters(params map[string]interface{}) (map[string]interface{
 				s := strconv.FormatFloat(fv, 'f', -1, 64)
 				i, err := strconv.ParseInt(s, 10, 64)
 				if err != nil {
-					return params, err //ErrInvalidType(k)
+					return params, ErrInvalidType(k)
 				}
 				v = i
 				params[k] = v
