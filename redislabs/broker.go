@@ -1,6 +1,7 @@
 package redislabs
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -120,7 +121,9 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 			b.Logger.Error("Failed to serialize the plan", err)
 			return brokerapi.IsAsync(false), err
 		}
-		if err = json.Unmarshal(byts, &params); err != nil {
+		decoder := json.NewDecoder(bytes.NewBuffer(byts))
+		decoder.UseNumber() // preserve integers
+		if err = decoder.Decode(&params); err != nil {
 			b.Logger.Error("Failed to setup the plan parameters", err)
 			return brokerapi.IsAsync(false), err
 		}
