@@ -20,7 +20,10 @@ Consult the [CF docs](http://docs.cloudfoundry.org/services/managing-service-bro
 
 Some notes specific for the Redis Labs broker:
 
-* Additional parameters (the `-c` option) are not supported on service instance creation. See the information about updating service instances in the next item.
+* A database name prefix is required for instance creation. Use the `-c` option to set one:
+```
+cf create-service ... -c '{"name":"mydatabase"}'
+```
 * The following parameters can be updated on an instance update (refer to the [RLEC docs](https://redislabs.com/redis-enterprise-documentation/overview) for details):
   - `memory_size` (integer, expressed in bytes)
   - `data_persistence` (string, either "disabled", "aof", or "snapshot")
