@@ -23,7 +23,7 @@ type PlanSettings struct {
 	ShardCount       int64             `json:"shards_count"`
 	Sharding         bool              `json:"sharding"`
 	ImplicitShardKey bool              `json:"implicit_shard_key"`
-	ShardKeyRegex    map[string]string `json:"shard_key_regex"`
+	ShardKeyRegex    map[string]string `json:"shard_key_regex,omitempty"`
 	Persistence      string            `json:"data_persistence,omitempty"`
 	Snapshot         []Snapshot        `json:"snapshot_policy,omitempty"`
 }
