@@ -9,8 +9,8 @@ import (
 
 	"github.com/Altoros/cf-redislabs-broker/redislabs"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_binders"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/instancebinders"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/instancecreators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/ldmberman/brokerapi"
 	"github.com/pivotal-golang/lager"
