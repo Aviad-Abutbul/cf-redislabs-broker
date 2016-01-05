@@ -2,6 +2,7 @@ package redislabs
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/passwords"
@@ -98,7 +99,7 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	// set it already.
 	for param, value := range provisionDetails.Parameters {
 		if param != "name" {
-			settings[param] = value
+			settings[param] = tryParseInt(value)
 		}
 	}
 
@@ -136,7 +137,7 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 
 	// Record additional parameters.
 	for param, value := range updateDetails.Parameters {
-		params[param] = value
+		params[param] = tryParseInt(value)
 	}
 
 	return brokerapi.IsAsync(false), b.InstanceCreator.Update(instanceID, params, b.StatePersister)
@@ -222,4 +223,14 @@ func (b *serviceBroker) readDatabaseName(instanceID string, details brokerapi.Pr
 		n = n[:RedisDatabaseNameLength]
 	}
 	return n, nil
+}
+
+func tryParseInt(value interface{}) interface{} {
+	if floatValue, isFloat := value.(float64); isFloat {
+		floatString := strconv.FormatFloat(floatValue, 'f', -1, 64)
+		if maybeInt, err := strconv.ParseInt(floatString, 10, 64); err == nil {
+			return maybeInt
+		}
+	}
+	return value
 }
