@@ -7,7 +7,7 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/passwords"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
-	"github.com/ldmberman/brokerapi"
+	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 )
 
@@ -72,20 +72,20 @@ func (b *serviceBroker) Services() []brokerapi.Service {
 	}
 }
 
-func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
+func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.ProvisionedServiceSpec, error) {
 	if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
-		return false, ErrServiceDoesNotExist
+		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, ErrServiceDoesNotExist
 	}
 	settingsByID := b.planSettings()
 	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
-		return false, ErrPlanDoesNotExist
+		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, ErrPlanDoesNotExist
 	}
 	planSettings := settingsByID[provisionDetails.PlanID]
 
 	name, err := b.readDatabaseName(instanceID, provisionDetails)
 	if err != nil {
 		b.Logger.Error("No database name was set", err)
-		return false, err
+		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, err
 	}
 
 	settings := map[string]interface{}{
@@ -107,16 +107,16 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 		password, err := passwords.Generate(RedisPasswordLength)
 		if err != nil {
 			b.Logger.Error("Failed to generate a password", err)
-			return false, err
+			return brokerapi.ProvisionedServiceSpec{IsAsync: false}, err
 		}
 		settings["authentication_redis_pass"] = password
 	}
 
-	return false, b.InstanceCreator.Create(instanceID, settings, b.StatePersister)
+	return brokerapi.ProvisionedServiceSpec{IsAsync: false}, b.InstanceCreator.Create(instanceID, settings, b.StatePersister)
 }
 
 func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.UpdateDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
-	if updateDetails.ID != b.Config.ServiceBroker.ServiceID {
+	if updateDetails.ServiceID != b.Config.ServiceBroker.ServiceID {
 		return false, ErrServiceDoesNotExist
 	}
 
@@ -143,17 +143,18 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 	return brokerapi.IsAsync(false), b.InstanceCreator.Update(instanceID, params, b.StatePersister)
 }
 
-func (b *serviceBroker) Deprovision(instanceID string) error {
-	return b.InstanceCreator.Destroy(instanceID, b.StatePersister)
+func (b *serviceBroker) Deprovision(instanceID string, details brokerapi.DeprovisionDetails, asyncAllowed bool) (brokerapi.IsAsync, error) {
+	return false, b.InstanceCreator.Destroy(instanceID, b.StatePersister)
 }
 
-func (b *serviceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (interface{}, error) {
+func (b *serviceBroker) Bind(instanceID, bindingID string, details brokerapi.BindDetails) (brokerapi.Binding, error) {
 	b.Logger.Info("Looking for the service credentials", lager.Data{
 		"instance-id": instanceID,
 		"binding-id":  bindingID,
 		"details":     details,
 	})
-	return b.InstanceBinder.Bind(instanceID, bindingID, b.StatePersister)
+	creds, err := b.InstanceBinder.Bind(instanceID, bindingID, b.StatePersister)
+	return brokerapi.Binding{Credentials: creds}, err
 }
 
 // Redis Labs cluster does not support multitenancy within a single
@@ -161,7 +162,7 @@ func (b *serviceBroker) Bind(instanceID, bindingID string, details brokerapi.Bin
 // credentials from the application environment. Unbind exists as a part
 // of the brokerapi.ServiceBroker interface and does not have to do
 // any specific job in this context.
-func (b *serviceBroker) Unbind(instanceID, bindingID string) error {
+func (b *serviceBroker) Unbind(instanceID, bindingID string, details brokerapi.UnbindDetails) error {
 	return nil
 }
 

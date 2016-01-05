@@ -22,10 +22,6 @@
 			"Rev": "9c068cf16d982f8bd444b8c352acbeec34c4fe5b"
 		},
 		{
-			"ImportPath": "github.com/ldmberman/brokerapi",
-			"Rev": "f3cc837f2ec03caa833baf0c5694cb8fd3bd5abc"
-		},
-		{
 			"ImportPath": "github.com/onsi/ginkgo",
 			"Comment": "v1.2.0-22-g39d2c24",
 			"Rev": "39d2c24f8a92c88f7e7f4d8ec6c80d3cc8f5ac65"
@@ -34,6 +30,10 @@
 			"ImportPath": "github.com/onsi/gomega",
 			"Comment": "v1.0-71-g2152b45",
 			"Rev": "2152b45fa28a361beba9aab0885972323a444e28"
+		},
+		{
+			"ImportPath": "github.com/pivotal-cf/brokerapi",
+			"Rev": "1ba4f73b999d6680b17ce390f7686a93cfed43ca"
 		},
 		{
 			"ImportPath": "github.com/pivotal-golang/lager",

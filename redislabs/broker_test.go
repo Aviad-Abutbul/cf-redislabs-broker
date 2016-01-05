@@ -14,7 +14,7 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs/instancecreators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/testing"
-	"github.com/ldmberman/brokerapi"
+	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 
 	. "github.com/onsi/ginkgo"
@@ -324,9 +324,9 @@ var _ = Describe("Broker", func() {
 				os.RemoveAll(tmpStateDir)
 			})
 			It("Successfully retrieves the credentials", func() {
-				credentials, err := broker.Bind("test-instance", "test-binding", details)
+				brokerapiBinding, err := broker.Bind("test-instance", "test-binding", details)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(credentials).To(Equal(map[string]interface{}{
+				Expect(brokerapiBinding.Credentials).To(Equal(map[string]interface{}{
 					"port":     11909,
 					"ip_list":  []string{"10.0.2.5"},
 					"password": "pass",
@@ -341,7 +341,7 @@ var _ = Describe("Broker", func() {
 		)
 		Context("When there are no provisioned instances", func() {
 			It("Deprovisioning results in a failure", func() {
-				err = broker.Deprovision("instance-id")
+				_, err = broker.Deprovision("instance-id", brokerapi.DeprovisionDetails{}, false)
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
 			})
@@ -379,9 +379,9 @@ var _ = Describe("Broker", func() {
 				os.RemoveAll(tmpStateDir)
 			})
 			It("Can delete it successfully", func() {
-				err = broker.Deprovision("test-instance")
+				_, err = broker.Deprovision("test-instance", brokerapi.DeprovisionDetails{}, false)
 				Expect(err).NotTo(HaveOccurred())
-				err = broker.Deprovision("test-instance")
+				_, err = broker.Deprovision("test-instance", brokerapi.DeprovisionDetails{}, false)
 				Expect(err).To(HaveOccurred())
 			})
 		})
@@ -404,7 +404,7 @@ var _ = Describe("Broker", func() {
 				}
 			})
 			It("Fails", func() {
-				_, err := broker.Update("test-instance", brokerapi.UpdateDetails{ID: "test-service"}, false)
+				_, err := broker.Update("test-instance", brokerapi.UpdateDetails{ServiceID: "test-service"}, false)
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(brokerapi.ErrInstanceDoesNotExist))
 			})
@@ -502,7 +502,7 @@ var _ = Describe("Broker", func() {
 			})
 			It("Updates its memory limit", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
-					ID: "test-service",
+					ServiceID: "test-service",
 					Parameters: map[string]interface{}{
 						"memory_size": 400000000,
 					},
@@ -513,8 +513,8 @@ var _ = Describe("Broker", func() {
 			})
 			It("Updates its plan", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
-					ID:     "test-service",
-					PlanID: "test-plan-2",
+					ServiceID: "test-service",
+					PlanID:    "test-plan-2",
 				}, false)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(updateSettings).To(HaveKey("memory_size"))
@@ -542,8 +542,8 @@ var _ = Describe("Broker", func() {
 			})
 			It("Updates both its plan and other parameters", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
-					ID:     "test-service",
-					PlanID: "test-plan-2",
+					ServiceID: "test-service",
+					PlanID:    "test-plan-2",
 					Parameters: map[string]interface{}{
 						"memory_size":      300000000,
 						"data_persistence": "aof",
@@ -561,8 +561,8 @@ var _ = Describe("Broker", func() {
 			})
 			It("Rejects to update it to an unknown plan", func() {
 				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
-					ID:     "test-service",
-					PlanID: "test-plan-3",
+					ServiceID: "test-service",
+					PlanID:    "test-plan-3",
 				}, false)
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(redislabs.ErrPlanDoesNotExist))
