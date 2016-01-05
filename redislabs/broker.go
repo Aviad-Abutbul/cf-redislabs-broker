@@ -123,7 +123,7 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 	settings := b.planSettings()
 	params := map[string]interface{}{}
 
-	if updateDetails.PlanID != "" {
+	if updateDetails.PlanID != updateDetails.PreviousValues.PlanID {
 		// If there is a request for a plan check whether it exists.
 		plan, ok := settings[updateDetails.PlanID]
 		if !ok {
