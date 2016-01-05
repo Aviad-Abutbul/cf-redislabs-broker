@@ -24,11 +24,8 @@ Some notes specific for the Redis Labs broker:
 ```
 cf create-service ... -c '{"name":"mydatabase"}'
 ```
-* The following parameters can be updated on an instance update (refer to the [RLEC docs](https://redislabs.com/redis-enterprise-documentation/overview) for details):
-  - `memory_size` (integer, expressed in bytes)
-  - `data_persistence` (string, either "disabled", "aof", or "snapshot")
-  - `snapshot_policy` (array of objects each with 2 properties - `writes` and `secs`, both integers)
-* You can switch between plans on a service update. Moreover, you can both switch between plans and update parameters described above at the same time.
+The instance ID is appended to this prefix in order to avoid name collisions. The name is then assigned to the DB in the RLEC API request.
+* Any parameters described in the RLEC API docs can be specified via the `-c` option both on instance creation and instance update.
 * The broker works in a synchronous way - all the time you just need to wait until the command has finished. Note that there is a 15 seconds timeout awaiting for a database creation - if it is over the request would fail.
 
 ### Logs
