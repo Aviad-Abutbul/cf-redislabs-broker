@@ -90,7 +90,13 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	settings := map[string]interface{}{
 		"name": name,
 	}
+	// Record values coming from the plan.
 	for param, value := range planSettings {
+		settings[param] = value
+	}
+	// Record additional values. The name is excluded since we have
+	// set it already.
+	for param, value := range provisionDetails.Parameters {
 		if param != "name" {
 			settings[param] = value
 		}
