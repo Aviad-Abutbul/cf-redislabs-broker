@@ -10,8 +10,8 @@ import (
 	"github.com/Altoros/cf-redislabs-broker/redislabs"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	brokerconfig "github.com/Altoros/cf-redislabs-broker/redislabs/config"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_binders"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/instance_creators"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/instancebinders"
+	"github.com/Altoros/cf-redislabs-broker/redislabs/instancecreators"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/testing"
 	"github.com/ldmberman/brokerapi"
@@ -148,7 +148,7 @@ var _ = Describe("Broker", func() {
 					tmpStateDir string
 					proxy       testing.HTTPProxy
 					err         error
-					settings    cluster.InstanceSettings
+					settings    map[string]interface{}
 				)
 
 				BeforeEach(func() {
@@ -190,11 +190,16 @@ var _ = Describe("Broker", func() {
 				It("Creates an instance of the configured default plan", func() {
 					_, err := broker.Provision("some-id", details, false)
 					Expect(err).ToNot(HaveOccurred())
-					Expect(settings.MemoryLimit).To(Equal(int64(1024)))
-					Expect(settings.Replication).To(Equal(true))
-					Expect(settings.Persistence).To(Equal("disabled"))
-					Expect(settings.Sharding).To(Equal(false))
-					Expect(settings.ImplicitShardKey).To(Equal(false))
+					Expect(settings).To(HaveKey("memory_size"))
+					Expect(settings["memory_size"]).To(Equal(float64(1024)))
+					Expect(settings).To(HaveKey("replication"))
+					Expect(settings["replication"]).To(Equal(true))
+					Expect(settings).To(HaveKey("data_persistence"))
+					Expect(settings["data_persistence"]).To(Equal("disabled"))
+					Expect(settings).To(HaveKey("sharding"))
+					Expect(settings["sharding"]).To(Equal(false))
+					Expect(settings).To(HaveKey("implicit_shard_key"))
+					Expect(settings["implicit_shard_key"]).To(Equal(false))
 				})
 				It("Rejects to provision the same instance again", func() {
 					broker.Provision("some-id", details, false)
@@ -227,13 +232,18 @@ var _ = Describe("Broker", func() {
 					It("Setups the sharding properly", func() {
 						_, err := broker.Provision("some-id", details, false)
 						Expect(err).NotTo(HaveOccurred())
-						Expect(settings.MemoryLimit).To(Equal(int64(2048)))
-						Expect(settings.ShardCount).To(Equal(int64(2)))
-						Expect(settings.Sharding).To(Equal(true))
-						Expect(settings.ImplicitShardKey).To(Equal(true))
-						Expect(settings.ShardKeyRegex).To(Equal([]cluster.ShardKeyRegex{
-							{Regex: `.*\{(?<tag>.*)\}.*`},
-							{Regex: `(?<tag>.*)`},
+						Expect(settings).To(HaveKey("memory_size"))
+						Expect(settings["memory_size"]).To(Equal(float64(2048)))
+						Expect(settings).To(HaveKey("shards_count"))
+						Expect(settings["shards_count"]).To(Equal(float64(2)))
+						Expect(settings).To(HaveKey("sharding"))
+						Expect(settings["sharding"]).To(Equal(true))
+						Expect(settings).To(HaveKey("implicit_shard_key"))
+						Expect(settings["implicit_shard_key"]).To(Equal(true))
+						Expect(settings).To(HaveKey("shard_key_regex"))
+						Expect(settings["shard_key_regex"]).To(BeEquivalentTo([]interface{}{
+							map[string]interface{}{"regex": `.*\{(?<tag>.*)\}.*`},
+							map[string]interface{}{"regex": `(?<tag>.*)`},
 						}))
 					})
 				})
@@ -250,12 +260,13 @@ var _ = Describe("Broker", func() {
 					It("Applies the given snapshot configuration", func() {
 						_, err := broker.Provision("some-id", details, false)
 						Expect(err).NotTo(HaveOccurred())
-						Expect(settings.Persistence).To(Equal("snapshot"))
-						Expect(len(settings.Snapshot)).To(Equal(1))
-						Expect(settings.Snapshot[0]).To(Equal(cluster.Snapshot{
-							Writes: 10,
-							Secs:   12,
-						}))
+						Expect(settings).To(HaveKey("data_persistence"))
+						Expect(settings["data_persistence"]).To(Equal("snapshot"))
+						Expect(settings).To(HaveKey("snapshot_policy"))
+						Expect(len(settings["snapshot_policy"].([]interface{}))).To(Equal(1))
+						policy := settings["snapshot_policy"].([]interface{})[0].(map[string]interface{})
+						Expect(policy["writes"]).To(BeEquivalentTo(10))
+						Expect(policy["secs"]).To(BeEquivalentTo(12))
 					})
 				})
 			})
@@ -555,26 +566,6 @@ var _ = Describe("Broker", func() {
 				}, false)
 				Expect(err).To(HaveOccurred())
 				Expect(err).To(Equal(redislabs.ErrPlanDoesNotExist))
-			})
-			It("Fails to process data of invalid type", func() {
-				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
-					ID: "test-service",
-					Parameters: map[string]interface{}{
-						"memory_size": "{{{",
-					},
-				}, false)
-				Expect(err).To(HaveOccurred())
-				Expect(err).To(Equal(cluster.ErrInvalidType("memory_size")))
-			})
-			It("Fails to process unknown properties", func() {
-				_, err = broker.Update("test-instance", brokerapi.UpdateDetails{
-					ID: "test-service",
-					Parameters: map[string]interface{}{
-						"unknown": 0,
-					},
-				}, false)
-				Expect(err).To(HaveOccurred())
-				Expect(err).To(Equal(cluster.ErrUnknownParam("unknown")))
 			})
 		})
 	})

@@ -30,7 +30,7 @@ func NewDefault(conf config.Config, logger lager.Logger) *defaultCreator {
 	}
 }
 
-func (d *defaultCreator) Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error {
+func (d *defaultCreator) Create(instanceID string, settings map[string]interface{}, persister persisters.StatePersister) error {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 
@@ -130,7 +130,7 @@ func (d *defaultCreator) InstanceExists(instanceID string, persister persisters.
 	return false, nil
 }
 
-func (d *defaultCreator) createDatabase(settings cluster.InstanceSettings) (cluster.InstanceCredentials, error) {
+func (d *defaultCreator) createDatabase(settings map[string]interface{}) (cluster.InstanceCredentials, error) {
 	api := apiclient.New(d.conf, d.logger)
 	ch, err := api.CreateDatabase(settings)
 	if err != nil {

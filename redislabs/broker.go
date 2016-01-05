@@ -1,11 +1,8 @@
 package redislabs
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 
-	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/passwords"
 	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
@@ -14,7 +11,7 @@ import (
 )
 
 type ServiceInstanceCreator interface {
-	Create(instanceID string, settings cluster.InstanceSettings, persister persisters.StatePersister) error
+	Create(instanceID string, settings map[string]interface{}, persister persisters.StatePersister) error
 	Update(instanceID string, params map[string]interface{}, persister persisters.StatePersister) error
 	Destroy(instanceID string, persister persisters.StatePersister) error
 	InstanceExists(instanceID string, persister persisters.StatePersister) (bool, error)
@@ -83,21 +80,31 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 		return false, ErrPlanDoesNotExist
 	}
 	planSettings := settingsByID[provisionDetails.PlanID]
+
 	name, err := b.readDatabaseName(instanceID, provisionDetails)
 	if err != nil {
 		b.Logger.Error("No database name was set", err)
 		return false, err
 	}
-	password, err := passwords.Generate(RedisPasswordLength)
-	if err != nil {
-		b.Logger.Error("Failed to generate a password", err)
-		return false, err
+
+	settings := map[string]interface{}{
+		"name": name,
 	}
-	settings := cluster.InstanceSettings{
-		Name:         name,
-		Password:     password,
-		PlanSettings: *planSettings,
+	for param, value := range planSettings {
+		if param != "name" {
+			settings[param] = value
+		}
 	}
+
+	if _, ok := settings["authentication_redis_pass"]; !ok {
+		password, err := passwords.Generate(RedisPasswordLength)
+		if err != nil {
+			b.Logger.Error("Failed to generate a password", err)
+			return false, err
+		}
+		settings["authentication_redis_pass"] = password
+	}
+
 	return false, b.InstanceCreator.Create(instanceID, settings, b.StatePersister)
 }
 
@@ -116,27 +123,13 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 			return brokerapi.IsAsync(false), ErrPlanDoesNotExist
 		}
 		// Record parameters coming from the plan change.
-		byts, err := json.Marshal(plan)
-		if err != nil {
-			b.Logger.Error("Failed to serialize the plan", err)
-			return brokerapi.IsAsync(false), err
-		}
-		decoder := json.NewDecoder(bytes.NewBuffer(byts))
-		decoder.UseNumber() // preserve integers
-		if err = decoder.Decode(&params); err != nil {
-			b.Logger.Error("Failed to setup the plan parameters", err)
-			return brokerapi.IsAsync(false), err
+		for param, value := range plan {
+			params[param] = value
 		}
 	}
 
-	// Check whether additional parameters are valid.
-	additionalParams, err := cluster.CheckUpdateParameters(updateDetails.Parameters)
-	if err != nil {
-		b.Logger.Error("Invalid update JSON data", err)
-		return brokerapi.IsAsync(false), err
-	}
 	// Record additional parameters.
-	for param, value := range additionalParams {
+	for param, value := range updateDetails.Parameters {
 		params[param] = value
 	}
 
@@ -181,28 +174,28 @@ func (b *serviceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
 	return plansByID
 }
 
-func (b *serviceBroker) planSettings() map[string]*cluster.PlanSettings {
-	settingsByID := map[string]*cluster.PlanSettings{}
+func (b *serviceBroker) planSettings() map[string]map[string]interface{} {
+	settingsByID := map[string]map[string]interface{}{}
 	for _, plan := range b.Config.ServiceBroker.Plans {
 		config := plan.ServiceInstanceConfig
-		settings := &cluster.PlanSettings{
-			MemoryLimit:      config.MemoryLimit,
-			Replication:      config.Replication,
-			ShardCount:       config.ShardCount,
-			Sharding:         config.ShardCount > 1,
-			ImplicitShardKey: config.ShardCount > 1,
-			Persistence:      config.Persistence,
+		settings := map[string]interface{}{
+			"memory_size":        config.MemoryLimit,
+			"replication":        config.Replication,
+			"shards_count":       config.ShardCount,
+			"sharding":           config.ShardCount > 1,
+			"implicit_shard_key": config.ShardCount > 1,
+			"data_persistence":   config.Persistence,
 		}
 		if config.ShardCount > 1 {
-			settings.ShardKeyRegex = []cluster.ShardKeyRegex{
-				{Regex: `.*\{(?<tag>.*)\}.*`},
-				{Regex: `(?<tag>.*)`},
+			settings["shard_key_regex"] = []map[string]string{
+				{"regex": `.*\{(?<tag>.*)\}.*`},
+				{"regex": `(?<tag>.*)`},
 			}
 		}
 		if config.Persistence == "snapshot" {
-			settings.Snapshot = []cluster.Snapshot{{
-				Writes: config.Snapshot.Writes,
-				Secs:   config.Snapshot.Secs,
+			settings["snapshot_policy"] = []map[string]int{{
+				"writes": config.Snapshot.Writes,
+				"secs":   config.Snapshot.Secs,
 			}}
 		}
 		settingsByID[plan.ID] = settings

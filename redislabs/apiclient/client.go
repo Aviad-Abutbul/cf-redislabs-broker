@@ -46,7 +46,7 @@ func New(conf config.Config, logger lager.Logger) *apiClient {
 	}
 }
 
-func (c *apiClient) CreateDatabase(settings cluster.InstanceSettings) (chan cluster.InstanceCredentials, error) {
+func (c *apiClient) CreateDatabase(settings map[string]interface{}) (chan cluster.InstanceCredentials, error) {
 	bytes, err := json.Marshal(settings)
 	if err != nil {
 		return nil, err

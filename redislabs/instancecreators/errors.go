@@ -8,5 +8,4 @@ var (
 	ErrFailedToSaveState            = errors.New("failed to save the new broker state")
 	ErrFailedToCreateDatabase       = errors.New("failed to create a database")
 	ErrCreateDatabaseTimeoutExpired = errors.New("create database timeout expired")
-	ErrInvalidUpdateData            = errors.New("invalid update JSON data")
 )
