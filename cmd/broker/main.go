@@ -17,15 +17,18 @@ import (
 )
 
 var (
-	localPersisterPath = path.Join(os.Getenv("HOME"), ".redislabs-broker", "state.json")
-
-	brokerConfigPath string
+	localPersisterPath string
+	brokerStateRoot    string
+	brokerConfigPath   string
 )
 
 func init() {
 	flag.StringVar(&brokerConfigPath, "c", "", "Configuration File")
+	flag.StringVar(&brokerStateRoot, "s", os.Getenv("HOME"), "State Root Folder")
 
 	flag.Parse()
+
+	localPersisterPath = path.Join(brokerStateRoot, ".redislabs-broker", "state.json")
 }
 
 func main() {
