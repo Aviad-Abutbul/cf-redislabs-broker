@@ -173,9 +173,9 @@ func (c *apiClient) DeleteDatabase(UID int) error {
 
 func (c *apiClient) httpClient() httpclient.HTTPClient {
 	return httpclient.New(
-		c.conf.Redislabs.Auth.Username,
-		c.conf.Redislabs.Auth.Password,
-		c.conf.Redislabs.Address,
+		c.conf.Cluster.Auth.Username,
+		c.conf.Cluster.Auth.Password,
+		c.conf.Cluster.Address,
 		c.logger,
 	)
 }

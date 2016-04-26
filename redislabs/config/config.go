@@ -7,11 +7,11 @@ import (
 )
 
 type Config struct {
-	Redislabs     RedislabsConfig     `yaml:"redislabs"`
+	Cluster       ClusterConfig       `yaml:"cluster"`
 	ServiceBroker ServiceBrokerConfig `yaml:"broker"`
 }
 
-type RedislabsConfig struct {
+type ClusterConfig struct {
 	Auth    AuthConfig `yaml:"auth"`
 	Address string     `yaml:"address"`
 }

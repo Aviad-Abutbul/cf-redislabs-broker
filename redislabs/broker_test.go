@@ -82,7 +82,7 @@ var _ = Describe("Broker", func() {
 							},
 						},
 					},
-					Redislabs: brokerconfig.RedislabsConfig{
+					Cluster: brokerconfig.ClusterConfig{
 						Address: "",
 					},
 				}
@@ -174,7 +174,7 @@ var _ = Describe("Broker", func() {
 							"status":                    "active",
 						}
 					})
-					config.Redislabs.Address = proxy.URL()
+					config.Cluster.Address = proxy.URL()
 
 					config.ServiceBroker.Plans[0].ServiceInstanceConfig = brokerconfig.ServiceInstanceConfig{
 						MemoryLimit: 1024,
@@ -372,7 +372,7 @@ var _ = Describe("Broker", func() {
 
 				proxy = testing.NewHTTPProxy()
 				proxy.RegisterEndpoints([]testing.Endpoint{{"/", ""}})
-				config.Redislabs.Address = proxy.URL()
+				config.Cluster.Address = proxy.URL()
 			})
 			AfterEach(func() {
 				proxy.Close()
@@ -477,7 +477,7 @@ var _ = Describe("Broker", func() {
 							},
 						},
 					},
-					Redislabs: brokerconfig.RedislabsConfig{
+					Cluster: brokerconfig.ClusterConfig{
 						Address: proxy.URL(),
 					},
 				}
