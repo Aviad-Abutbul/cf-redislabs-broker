@@ -176,7 +176,6 @@ func (c *apiClient) httpClient() httpclient.HTTPClient {
 		c.conf.Redislabs.Auth.Username,
 		c.conf.Redislabs.Auth.Password,
 		c.conf.Redislabs.Address,
-		c.conf.Redislabs.Port,
 		c.logger,
 	)
 }

@@ -26,7 +26,6 @@ type (
 		password string
 		username string
 		address  string
-		port     int
 		logger   lager.Logger
 		client   *http.Client
 	}
@@ -45,13 +44,12 @@ var defaultClient = &http.Client{
 }
 
 // New returns a client that implements HTTPClient interface.
-func New(username string, password string, address string, port int, logger lager.Logger) *httpClient {
-	logger.Info("Creating new http client", lager.Data{"address": address, "port": port})
+func New(username string, password string, address string, logger lager.Logger) *httpClient {
+	logger.Info("Creating new http client", lager.Data{"address": address})
 	return &httpClient{
 		username: username,
 		password: password,
 		address:  address,
-		port:     port,
 		logger:   logger,
 		client:   defaultClient,
 	}

@@ -14,7 +14,6 @@ type Config struct {
 type RedislabsConfig struct {
 	Auth    AuthConfig `yaml:"auth"`
 	Address string     `yaml:"address"`
-	Port    int        `yaml:"port"`
 }
 
 type ServiceBrokerConfig struct {
