@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/httpclient"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/cluster"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/config"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/httpclient"
 	"github.com/pivotal-golang/lager"
 )
 

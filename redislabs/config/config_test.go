@@ -1,7 +1,7 @@
 package config_test
 
 import (
-	brokerconfig "github.com/Altoros/cf-redislabs-broker/redislabs/config"
+	brokerconfig "github.com/RedisLabs/cf-redislabs-broker/redislabs/config"
 
 	// "os"
 	"path"

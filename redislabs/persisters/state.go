@@ -1,6 +1,6 @@
 package persisters
 
-import "github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
+import "github.com/RedisLabs/cf-redislabs-broker/redislabs/cluster"
 
 // StatePersister is responsible for saving & retrieving
 // the broker state, the information about available service

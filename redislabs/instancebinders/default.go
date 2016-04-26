@@ -1,8 +1,8 @@
 package instancebinders
 
 import (
-	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/config"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 )

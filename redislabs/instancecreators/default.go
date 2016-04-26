@@ -5,10 +5,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Altoros/cf-redislabs-broker/redislabs/apiclient"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/apiclient"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/cluster"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/config"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 )

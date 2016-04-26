@@ -7,11 +7,11 @@ import (
 	"os"
 	"path"
 
-	"github.com/Altoros/cf-redislabs-broker/redislabs"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/config"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/instancebinders"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/instancecreators"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/config"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/instancebinders"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/instancecreators"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/persisters"
 	"github.com/pivotal-cf/brokerapi"
 	"github.com/pivotal-golang/lager"
 )

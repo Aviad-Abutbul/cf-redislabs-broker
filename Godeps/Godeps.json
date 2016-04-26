@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/Altoros/cf-redislabs-broker",
+	"ImportPath": "github.com/RedisLabs/cf-redislabs-broker",
 	"GoVersion": "go1.5",
 	"Packages": [
 		"./..."

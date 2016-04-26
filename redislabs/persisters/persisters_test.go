@@ -5,8 +5,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/Altoros/cf-redislabs-broker/redislabs/cluster"
-	"github.com/Altoros/cf-redislabs-broker/redislabs/persisters"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/cluster"
+	"github.com/RedisLabs/cf-redislabs-broker/redislabs/persisters"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
