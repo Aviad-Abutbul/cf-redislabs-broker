@@ -39,6 +39,10 @@ var _ = Describe("Config", func() {
 		It("loads service id", func() {
 			Ω(config.ServiceBroker.ServiceID).To(Equal("redislabs-service-broker-0b814f"))
 		})
+		It("loads service metadata", func() {
+			Ω(config.ServiceBroker.Metadata.Image).To(Equal("base-64-image"))
+			Ω(config.ServiceBroker.Metadata.ProviderDisplayName).To(Equal("RedisLabs"))
+		})
 		It("loads service broker plans", func() {
 			Ω(config.ServiceBroker.Plans).To(Equal("redislabs-service-broker-0b814f"))
 		})

@@ -1,6 +1,7 @@
 package redislabs
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -68,21 +69,32 @@ func (b *serviceBroker) Services() []brokerapi.Service {
 			Tags:          []string{"redislabs"},
 			Plans:         planList,
 			PlanUpdatable: true,
+			Metadata: &brokerapi.ServiceMetadata{
+				ImageUrl:            b.Config.ServiceBroker.Metadata.Image,
+				ProviderDisplayName: b.Config.ServiceBroker.Metadata.ProviderDisplayName,
+			},
 		},
 	}
 }
 
-func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.ProvisionedServiceSpec, error) {
-	if provisionDetails.ID != b.Config.ServiceBroker.ServiceID {
+func (b *serviceBroker) Provision(instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.ProvisionedServiceSpec, error) {
+	if details.ServiceID != b.Config.ServiceBroker.ServiceID {
 		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, ErrServiceDoesNotExist
 	}
 	settingsByID := b.planSettings()
-	if _, ok := settingsByID[provisionDetails.PlanID]; !ok {
+	if _, ok := settingsByID[details.PlanID]; !ok {
 		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, ErrPlanDoesNotExist
 	}
-	planSettings := settingsByID[provisionDetails.PlanID]
+	planSettings := settingsByID[details.PlanID]
 
-	name, err := b.readDatabaseName(instanceID, provisionDetails)
+	// Unmarhal raw parameters
+	var provisionParameters map[string]interface{}
+	err := json.Unmarshal(details.RawParameters, &provisionParameters)
+	if err != nil {
+		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, brokerapi.ErrRawParamsInvalid
+	}
+
+	name, err := b.readDatabaseName(instanceID, provisionParameters)
 	if err != nil {
 		b.Logger.Error("No database name was set", err)
 		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, err
@@ -95,9 +107,10 @@ func (b *serviceBroker) Provision(instanceID string, provisionDetails brokerapi.
 	for param, value := range planSettings {
 		settings[param] = value
 	}
+
 	// Record additional values. The name is excluded since we have
 	// set it already.
-	for param, value := range provisionDetails.Parameters {
+	for param, value := range provisionParameters {
 		if param != "name" {
 			settings[param] = tryParseInt(value)
 		}
@@ -211,11 +224,8 @@ func (b *serviceBroker) planSettings() map[string]map[string]interface{} {
 	return settingsByID
 }
 
-func (b *serviceBroker) readDatabaseName(instanceID string, details brokerapi.ProvisionDetails) (string, error) {
-	if details.Parameters == nil {
-		return "", ErrDatabaseNameIsRequired
-	}
-	name, ok := details.Parameters["name"]
+func (b *serviceBroker) readDatabaseName(instanceID string, params map[string]interface{}) (string, error) {
+	name, ok := params["name"]
 	if !ok || name == "" {
 		return "", ErrDatabaseNameIsRequired
 	}

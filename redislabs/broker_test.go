@@ -88,12 +88,13 @@ var _ = Describe("Broker", func() {
 				}
 			})
 			JustBeforeEach(func() {
+				encodedParams, _ := json.Marshal(params)
 				details = brokerapi.ProvisionDetails{
-					ID:               requestedServiceID,
+					ServiceID:        requestedServiceID,
 					PlanID:           requestedPlanID,
 					OrganizationGUID: "",
 					SpaceGUID:        "",
-					Parameters:       params,
+					RawParameters:    encodedParams,
 				}
 			})
 			Context("And a wrong service ID", func() {
@@ -488,13 +489,11 @@ var _ = Describe("Broker", func() {
 			})
 			JustBeforeEach(func() {
 				_, err = broker.Provision("test-instance", brokerapi.ProvisionDetails{
-					ID:               "test-service",
+					ServiceID:        "test-service",
 					PlanID:           "test-plan-1",
 					OrganizationGUID: "",
 					SpaceGUID:        "",
-					Parameters: map[string]interface{}{
-						"name": "test",
-					},
+					RawParameters:    []byte(`{"name": "test"}`),
 				}, false)
 				if err != nil {
 					panic(err)

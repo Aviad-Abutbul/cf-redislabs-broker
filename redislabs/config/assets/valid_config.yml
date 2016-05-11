@@ -13,6 +13,9 @@ broker:
   service_id: "redislabs-service-broker-0b814f"
   state_persister:
     file: /tmp/redislabs-statefile.json
+  metadata:
+    image: base-64-image
+    provider_display_name: RedisLabs
   plans:
   - name: minimal
     id: rlec-minimal-plan-4fc771

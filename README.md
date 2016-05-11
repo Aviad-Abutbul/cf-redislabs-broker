@@ -62,7 +62,7 @@ After that you'll find the resulting binary in `out/redislabs-service-broker`.
 ### Running unit tests
 
 ```
-go test ./redislabs/...
+./bin/test
 ```
 
 ### Adding a dependency

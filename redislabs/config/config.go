@@ -23,6 +23,7 @@ type ServiceBrokerConfig struct {
 	Port        int                 `yaml:"port"`
 	Name        string              `yaml:"name"`
 	Description string              `yaml:"description"`
+	Metadata    ServiceMetadata     `yaml:"metadata"`
 }
 
 type AuthConfig struct {
@@ -48,6 +49,11 @@ type ServiceInstanceConfig struct {
 type Snapshot struct {
 	Writes int `yaml:"writes"`
 	Secs   int `yaml:"secs"`
+}
+
+type ServiceMetadata struct {
+	Image               string `yaml:"image"`
+	ProviderDisplayName string `yaml:"provider_display_name"`
 }
 
 func LoadFromFile(path string) (Config, error) {

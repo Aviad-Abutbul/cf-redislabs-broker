@@ -15,6 +15,7 @@ type FakeServiceBroker struct {
 	BoundBindingIDs     []string
 	BoundBindingDetails brokerapi.BindDetails
 	SyslogDrainURL      string
+	RouteServiceURL     string
 
 	UnbindingDetails brokerapi.UnbindDetails
 
@@ -60,24 +61,17 @@ func (fakeBroker *FakeServiceBroker) Services() []brokerapi.Service {
 					ID:          "ABE176EE-F69F-4A96-80CE-142595CC24E3",
 					Name:        "default",
 					Description: "The default Cassandra plan",
-					Metadata: brokerapi.ServicePlanMetadata{
+					Metadata: &brokerapi.ServicePlanMetadata{
 						Bullets:     []string{},
 						DisplayName: "Cassandra",
 					},
 				},
 			},
-			Metadata: brokerapi.ServiceMetadata{
+			Metadata: &brokerapi.ServiceMetadata{
 				DisplayName:      "Cassandra",
 				LongDescription:  "Long description",
 				DocumentationUrl: "http://thedocs.com",
 				SupportUrl:       "http://helpme.no",
-				Listing: brokerapi.ServiceMetadataListing{
-					Blurb:    "blah blah",
-					ImageUrl: "http://foo.com/thing.png",
-				},
-				Provider: brokerapi.ServiceMetadataProvider{
-					Name: "Pivotal",
-				},
 			},
 			Tags: []string{
 				"pivotal",
@@ -237,7 +231,8 @@ func (fakeBroker *FakeServiceBroker) Bind(instanceID, bindingID string, details 
 			Username: "batman",
 			Password: "robin",
 		},
-		SyslogDrainURL: fakeBroker.SyslogDrainURL,
+		SyslogDrainURL:  fakeBroker.SyslogDrainURL,
+		RouteServiceURL: fakeBroker.RouteServiceURL,
 	}, nil
 }
 
