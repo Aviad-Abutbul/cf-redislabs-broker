@@ -70,6 +70,7 @@ func (b *serviceBroker) Services() []brokerapi.Service {
 			Plans:         planList,
 			PlanUpdatable: true,
 			Metadata: &brokerapi.ServiceMetadata{
+				DisplayName:         b.Config.ServiceBroker.Metadata.DisplayName,
 				ImageUrl:            b.Config.ServiceBroker.Metadata.Image,
 				ProviderDisplayName: b.Config.ServiceBroker.Metadata.ProviderDisplayName,
 			},

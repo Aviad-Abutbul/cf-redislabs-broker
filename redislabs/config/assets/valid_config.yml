@@ -14,6 +14,7 @@ broker:
   state_persister:
     file: /tmp/redislabs-statefile.json
   metadata:
+    display_name: RedisLabs Enterprise Cluster
     image: base-64-image
     provider_display_name: RedisLabs
   plans:

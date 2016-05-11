@@ -40,6 +40,7 @@ var _ = Describe("Config", func() {
 			Ω(config.ServiceBroker.ServiceID).To(Equal("redislabs-service-broker-0b814f"))
 		})
 		It("loads service metadata", func() {
+			Ω(config.ServiceBroker.Metadata.DisplayName).To(Equal("RedisLabs Enterprise Cluster"))
 			Ω(config.ServiceBroker.Metadata.Image).To(Equal("base-64-image"))
 			Ω(config.ServiceBroker.Metadata.ProviderDisplayName).To(Equal("RedisLabs"))
 		})

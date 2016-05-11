@@ -57,6 +57,7 @@ type Snapshot struct {
 }
 
 type ServiceMetadata struct {
+	DisplayName         string `yaml:"display_name"`
 	Image               string `yaml:"image"`
 	ProviderDisplayName string `yaml:"provider_display_name"`
 }
