@@ -602,6 +602,7 @@ var _ = Describe("Broker", func() {
 					ID:          "plan-1",
 					Name:        "plan",
 					Description: "plan description",
+					Metadata:    &brokerapi.ServicePlanMetadata{},
 				}))
 			})
 			It("Assigns a tag", func() {

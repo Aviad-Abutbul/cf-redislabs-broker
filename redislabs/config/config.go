@@ -35,7 +35,12 @@ type ServicePlanConfig struct {
 	ID                    string                `yaml:"id"`
 	Name                  string                `yaml:"name"`
 	Description           string                `yaml:"description"`
+	Metadata              ServicePlanMetadata   `yaml:"metadata"`
 	ServiceInstanceConfig ServiceInstanceConfig `yaml:"settings"`
+}
+
+type ServicePlanMetadata struct {
+	Bullets []string `yaml:"bullets"`
 }
 
 type ServiceInstanceConfig struct {

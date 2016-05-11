@@ -190,6 +190,9 @@ func (b *serviceBroker) planDescriptions() map[string]*brokerapi.ServicePlan {
 			ID:          plan.ID,
 			Name:        plan.Name,
 			Description: plan.Description,
+			Metadata: &brokerapi.ServicePlanMetadata{
+				Bullets: plan.Metadata.Bullets,
+			},
 		}
 	}
 	return plansByID
