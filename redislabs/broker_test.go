@@ -63,11 +63,10 @@ var _ = Describe("Broker", func() {
 
 	Describe("Provisioning an instance", func() {
 		var (
-			serviceID                           = "test-service-id"
-			planID                              = "test-plan-id"
-			requestedServiceID, requestedPlanID string
-			params                              map[string]interface{}
-			details                             brokerapi.ProvisionDetails
+			serviceID       = "test-service-id"
+			planID          = "test-plan-id"
+			requestedPlanID string
+			details         brokerapi.ProvisionDetails
 		)
 		Context("Given a config with a default plan", func() {
 			BeforeEach(func() {
@@ -88,21 +87,16 @@ var _ = Describe("Broker", func() {
 				}
 			})
 
-			JustBeforeEach(func() {
-				encodedParams, _ := json.Marshal(params)
-				details = brokerapi.ProvisionDetails{
-					ServiceID:        requestedServiceID,
-					PlanID:           requestedPlanID,
-					OrganizationGUID: "",
-					SpaceGUID:        "",
-					RawParameters:    encodedParams,
-				}
-			})
-
 			Context("And a wrong service ID", func() {
 				BeforeEach(func() {
-					requestedServiceID = "unknown"
+					details = brokerapi.ProvisionDetails{
+						ServiceID:        "unknown",
+						PlanID:           requestedPlanID,
+						OrganizationGUID: "",
+						SpaceGUID:        "",
+					}
 				})
+
 				It("Rejects to create an instance", func() {
 					_, err := broker.Provision("some-id", details, false)
 					Expect(err).To(HaveOccurred())
@@ -112,9 +106,14 @@ var _ = Describe("Broker", func() {
 
 			Context("And a wrong plan ID", func() {
 				BeforeEach(func() {
-					requestedServiceID = serviceID
-					requestedPlanID = "unknown"
+					details = brokerapi.ProvisionDetails{
+						ServiceID:        serviceID,
+						PlanID:           "unknown",
+						OrganizationGUID: "",
+						SpaceGUID:        "",
+					}
 				})
+
 				It("Rejects to create an instance", func() {
 					_, err := broker.Provision("some-id", details, false)
 					Expect(err).To(HaveOccurred())
@@ -122,7 +121,7 @@ var _ = Describe("Broker", func() {
 				})
 			})
 
-			Context("And given proper settings", func() {
+			Context("Valid settings", func() {
 				var (
 					tmpStateDir string
 					proxy       testing.HTTPProxy
@@ -131,9 +130,11 @@ var _ = Describe("Broker", func() {
 				)
 
 				BeforeEach(func() {
-					requestedPlanID = planID
-					params = map[string]interface{}{
-						"name": "test",
+					details = brokerapi.ProvisionDetails{
+						ServiceID:        serviceID,
+						PlanID:           planID,
+						OrganizationGUID: "",
+						SpaceGUID:        "",
 					}
 					tmpStateDir, err = ioutil.TempDir("", "redislabs-state-test")
 					Expect(err).NotTo(HaveOccurred())
@@ -162,6 +163,7 @@ var _ = Describe("Broker", func() {
 						Persistence: "disabled",
 					}
 				})
+
 				AfterEach(func() {
 					proxy.Close()
 					os.RemoveAll(tmpStateDir)
@@ -202,6 +204,15 @@ var _ = Describe("Broker", func() {
 						Password: "pass",
 					}))
 				})
+
+				Context("When optional database name given", func() {
+					It("works", func() {
+						details.RawParameters = []byte(`{"name": "mydb"}`)
+						_, err := broker.Provision("some-id", details, false)
+						Expect(err).ToNot(HaveOccurred())
+					})
+				})
+
 				Context("And when requested for more than one shard", func() {
 					BeforeEach(func() {
 						config.ServiceBroker.Plans[0].ServiceInstanceConfig = brokerconfig.ServiceInstanceConfig{
@@ -227,6 +238,7 @@ var _ = Describe("Broker", func() {
 						}))
 					})
 				})
+
 				Context("And when requested for snapshots", func() {
 					BeforeEach(func() {
 						config.ServiceBroker.Plans[0].ServiceInstanceConfig = brokerconfig.ServiceInstanceConfig{

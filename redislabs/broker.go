@@ -90,9 +90,11 @@ func (b *serviceBroker) Provision(instanceID string, details brokerapi.Provision
 
 	// Unmarhal raw parameters
 	var provisionParameters map[string]interface{}
-	err := json.Unmarshal(details.RawParameters, &provisionParameters)
-	if err != nil {
-		return brokerapi.ProvisionedServiceSpec{IsAsync: false}, brokerapi.ErrRawParamsInvalid
+	if len(details.RawParameters) > 0 {
+		err := json.Unmarshal(details.RawParameters, &provisionParameters)
+		if err != nil {
+			return brokerapi.ProvisionedServiceSpec{IsAsync: false}, brokerapi.ErrRawParamsInvalid
+		}
 	}
 
 	name, err := b.readDatabaseName(instanceID, provisionParameters)
