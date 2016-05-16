@@ -87,6 +87,7 @@ var _ = Describe("Broker", func() {
 					},
 				}
 			})
+
 			JustBeforeEach(func() {
 				encodedParams, _ := json.Marshal(params)
 				details = brokerapi.ProvisionDetails{
@@ -97,6 +98,7 @@ var _ = Describe("Broker", func() {
 					RawParameters:    encodedParams,
 				}
 			})
+
 			Context("And a wrong service ID", func() {
 				BeforeEach(func() {
 					requestedServiceID = "unknown"
@@ -120,30 +122,6 @@ var _ = Describe("Broker", func() {
 				})
 			})
 
-			Context("And no database name", func() {
-				BeforeEach(func() {
-					requestedPlanID = planID
-				})
-				It("Complains about the database name", func() {
-					_, err := broker.Provision("some-id", details, false)
-					Expect(err).To(HaveOccurred())
-					Expect(err).To(Equal(redislabs.ErrDatabaseNameIsRequired))
-				})
-			})
-
-			Context("And an empty name for the database", func() {
-				BeforeEach(func() {
-					params = map[string]interface{}{
-						"name": "",
-					}
-				})
-				It("Complains about the database name", func() {
-					_, err := broker.Provision("some-id", details, false)
-					Expect(err).To(HaveOccurred())
-					Expect(err).To(Equal(redislabs.ErrDatabaseNameIsRequired))
-				})
-			})
-
 			Context("And given proper settings", func() {
 				var (
 					tmpStateDir string
@@ -153,6 +131,7 @@ var _ = Describe("Broker", func() {
 				)
 
 				BeforeEach(func() {
+					requestedPlanID = planID
 					params = map[string]interface{}{
 						"name": "test",
 					}

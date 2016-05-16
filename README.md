@@ -20,11 +20,11 @@ Consult the [CF docs](http://docs.cloudfoundry.org/services/managing-service-bro
 
 Some notes specific for the Redis Labs broker:
 
-* A database name prefix is required for instance creation. Use the `-c` option to set one:
+* A database name prefix can be provided for instance creation to make it easier to find DB with RLEC UI. Use the `-c` option to set one:
 ```
 cf create-service ... -c '{"name":"mydatabase"}'
 ```
-The instance ID is appended to this prefix in order to avoid name collisions. The name is then assigned to the DB in the RLEC API request.
+The instance ID is appended to this prefix in order to avoid name collisions. The name is then assigned to the DB in the RLEC API request. If no name spacified default "cf" name is used.
 * Any parameters described in the RLEC API docs can be specified via the `-c` option both on instance creation and instance update.
 * The broker works in a synchronous way - all the time you just need to wait until the command has finished. Note that there is a 15 seconds timeout awaiting for a database creation - if it is over the request would fail.
 

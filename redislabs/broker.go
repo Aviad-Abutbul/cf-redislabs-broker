@@ -229,15 +229,19 @@ func (b *serviceBroker) planSettings() map[string]map[string]interface{} {
 }
 
 func (b *serviceBroker) readDatabaseName(instanceID string, params map[string]interface{}) (string, error) {
-	name, ok := params["name"]
-	if !ok || name == "" {
-		return "", ErrDatabaseNameIsRequired
+	var nameParam interface{}
+
+	nameParam, ok := params["name"]
+	if !ok || nameParam == nil {
+		nameParam = "cf"
 	}
-	n := fmt.Sprintf("%s-%s", name, instanceID)
-	if len(n) > RedisDatabaseNameLength {
-		n = n[:RedisDatabaseNameLength]
+
+	name := fmt.Sprintf("%s-%s", nameParam, instanceID)
+	if len(name) > RedisDatabaseNameLength {
+		name = name[:RedisDatabaseNameLength]
 	}
-	return n, nil
+
+	return name, nil
 }
 
 func tryParseInt(value interface{}) interface{} {
