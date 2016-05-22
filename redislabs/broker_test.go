@@ -183,11 +183,13 @@ var _ = Describe("Broker", func() {
 					Expect(settings).To(HaveKey("implicit_shard_key"))
 					Expect(settings["implicit_shard_key"]).To(Equal(false))
 				})
+
 				It("Rejects to provision the same instance again", func() {
 					broker.Provision("some-id", details, false)
 					_, err := broker.Provision("some-id", details, false)
 					Expect(err).To(HaveOccurred())
 				})
+
 				It("Saves the credentials properly", func() {
 					_, err := broker.Provision("some-id", details, false)
 					Expect(err).ToNot(HaveOccurred())
@@ -205,11 +207,27 @@ var _ = Describe("Broker", func() {
 					}))
 				})
 
-				Context("When optional database name given", func() {
-					It("works", func() {
-						details.RawParameters = []byte(`{"name": "mydb"}`)
-						_, err := broker.Provision("some-id", details, false)
-						Expect(err).ToNot(HaveOccurred())
+				Context("When optional attributues given", func() {
+					Context("name", func() {
+						It("works", func() {
+							details.RawParameters = []byte(`{"name": "mydb"}`)
+							_, err := broker.Provision("some-id", details, false)
+							Expect(err).ToNot(HaveOccurred())
+						})
+					})
+
+					Context("memory_size", func() {
+						It("works when value is integer", func() {
+							details.RawParameters = []byte(`{"memory_size": 1024}`)
+							_, err := broker.Provision("some-id", details, false)
+							Expect(err).ToNot(HaveOccurred())
+						})
+
+						It("works when value is string", func() {
+							details.RawParameters = []byte(`{"memory_size": "1024"}`)
+							_, err := broker.Provision("some-id", details, false)
+							Expect(err).ToNot(HaveOccurred())
+						})
 					})
 				})
 

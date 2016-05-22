@@ -114,9 +114,7 @@ func (b *serviceBroker) Provision(instanceID string, details brokerapi.Provision
 	// Record additional values. The name is excluded since we have
 	// set it already.
 	for param, value := range provisionParameters {
-		if param != "name" {
-			settings[param] = tryParseInt(value)
-		}
+		settings[param] = castValue(value)
 	}
 
 	if _, ok := settings["authentication_redis_pass"]; !ok {
@@ -153,7 +151,7 @@ func (b *serviceBroker) Update(instanceID string, updateDetails brokerapi.Update
 
 	// Record additional parameters.
 	for param, value := range updateDetails.Parameters {
-		params[param] = tryParseInt(value)
+		params[param] = castValue(value)
 	}
 
 	return brokerapi.IsAsync(false), b.InstanceCreator.Update(instanceID, params, b.StatePersister)
@@ -246,11 +244,25 @@ func (b *serviceBroker) readDatabaseName(instanceID string, params map[string]in
 	return name, nil
 }
 
-func tryParseInt(value interface{}) interface{} {
-	if floatValue, isFloat := value.(float64); isFloat {
-		floatString := strconv.FormatFloat(floatValue, 'f', -1, 64)
-		if maybeInt, err := strconv.ParseInt(floatString, 10, 64); err == nil {
-			return maybeInt
+func castValue(value interface{}) interface{} {
+	switch v := value.(type) {
+	case string:
+		// try int
+		intValue, err := strconv.ParseInt(v, 10, 32)
+		if err == nil {
+			return intValue
+		}
+
+		// try float
+		floatValue, err := strconv.ParseFloat(v, 64)
+		if err == nil {
+			return floatValue
+		}
+
+		// try bool
+		boolVal, err := strconv.ParseBool(v)
+		if err == nil {
+			return boolVal
 		}
 	}
 	return value
