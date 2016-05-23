@@ -3,6 +3,7 @@ package redislabs
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/RedisLabs/cf-redislabs-broker/redislabs/config"
@@ -263,6 +264,10 @@ func castValue(value interface{}) interface{} {
 		boolVal, err := strconv.ParseBool(v)
 		if err == nil {
 			return boolVal
+		}
+	case float64:
+		if (v - math.Ceil(v)) == 0 {
+			return int64(v)
 		}
 	}
 	return value
